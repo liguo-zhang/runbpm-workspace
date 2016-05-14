@@ -1,0 +1,7 @@
+除了依赖runbpm-engine的jar包外，增加了下面两个upload相关的jar包。全部放在了WEB-INF/lib下。
+
+upload:
+commons-fileupload-1.3.1.jar
+commons-io-2.5.jar
+
+
