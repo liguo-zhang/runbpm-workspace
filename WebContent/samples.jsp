@@ -62,7 +62,7 @@ desired effect
       <!-- mini logo for sidebar mini 50x50 pixels -->
       <span class="logo-mini">R</span>
       <!-- logo for regular state and mobile devices -->
-      <span class="logo-lg">RunBPM工作台</span>
+      <span class="logo-lg"><img src="ui/images/runbpm-logo-workspace.png"></span>
     </a>
 
     <!-- Header Navbar -->

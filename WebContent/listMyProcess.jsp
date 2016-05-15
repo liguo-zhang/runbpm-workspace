@@ -9,7 +9,8 @@
 <%@ page import="org.runbpm.service.RuntimeService" %>
 <%
 RuntimeService runtimeService = Configuration.getContext().getRuntimeService();
-List<ProcessModel> processModelist = runtimeService.loadProcessModels(true);
+List<ProcessInstance> processList =  runtimeService.listProcessInstanceByCreator("111");
+
 %>
 
 <!DOCTYPE html>
@@ -76,7 +77,7 @@ desired effect
       <!-- mini logo for sidebar mini 50x50 pixels -->
       <span class="logo-mini">R</span>
       <!-- logo for regular state and mobile devices -->
-      <span class="logo-lg">RunBPM工作台</span>
+      <span class="logo-lg"><img src="ui/images/runbpm-logo-workspace.png"></span>
     </a>
 
     <!-- Header Navbar -->
@@ -207,7 +208,7 @@ desired effect
     <section class="content">
        <div class="box">
             <div class="box-header">
-              <h3 class="box-title">流程模板列表</h3>
+              <h3 class="box-title">本人创建，且未结束的流程实例</h3>
 
               <div class="box-tools">
                 <div class="input-group input-group-sm" style="width: 150px;">
@@ -223,26 +224,24 @@ desired effect
             <div class="box-body table-responsive no-padding">
               <table class="table table-hover">
                 <tr>
-                  <th>模板ID</th>
+                  <th>ID</th>
                   <th>流程定义</th>
-                  <th>流程定义版本</th>
                   <th>名称</th>
-                  <th>描述</th>
+                  <th>状态</th>
                   <th>创建时间</th>
-                  <th>操作</th>
+                  <th>最近更新时间</th>
                 </tr>
                 <%
-                for(ProcessModel pm : processModelist){
+                for(ProcessInstance processInstance : processList){
                 	
                 %>
                 <tr>
-                  <td><%=pm.getId() %></td>
-                  <td><%=pm.getProcessDefinition().getId() %></td>
-                  <td><%=pm.getVersion() %></td>
-                  <td><%=pm.getName() %></td>
-                  <td><%=pm.getProcessDefinition().getDocumentation() %></td>
-                  <td><%=pm.getCreateDate() %></td>
-                  <td><button id="create_process" modelid='<%=pm.getId() %><' type="button" class="btn btn-info btn-sm">创建流程</button></td>
+                  <td><%=processInstance.getId() %></td>
+                  <td><%=processInstance.getProcessDefinitionId() %></td>
+                  <td><%=processInstance.getName() %></td>
+                  <td><%=processInstance.getState() %></td>
+                  <td><%=processInstance.getCreateDate() %></td>
+                  <td><%=processInstance.getModifyDate()%></td>
                 </tr>
                 <%
                 }

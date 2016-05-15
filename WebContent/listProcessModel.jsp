@@ -10,6 +10,16 @@
 <%
 RuntimeService runtimeService = Configuration.getContext().getRuntimeService();
 List<ProcessModel> processModelist = runtimeService.loadProcessModels(true);
+
+//判断是否需要提交
+String isSubmit = request.getParameter("isSubmit")+"";
+if(isSubmit!=null&&isSubmit.trim().equals("1")){
+	//String modelId = request.getAttribute("modelId")+"";
+	String modelId = request.getParameter("modelId")+"";
+	System.out.println(modelId);
+	runtimeService.createAndStartProcessInstance(Long.parseLong(modelId), "111");
+}
+
 %>
 
 <!DOCTYPE html>
@@ -76,7 +86,7 @@ desired effect
       <!-- mini logo for sidebar mini 50x50 pixels -->
       <span class="logo-mini">R</span>
       <!-- logo for regular state and mobile devices -->
-      <span class="logo-lg">RunBPM工作台</span>
+      <span class="logo-lg"><img src="ui/images/runbpm-logo-workspace.png"></span>
     </a>
 
     <!-- Header Navbar -->
@@ -220,36 +230,38 @@ desired effect
               </div>
             </div>
             <!-- /.box-header -->
-            <div class="box-body table-responsive no-padding">
-              <table class="table table-hover">
-                <tr>
-                  <th>模板ID</th>
-                  <th>流程定义</th>
-                  <th>流程定义版本</th>
-                  <th>名称</th>
-                  <th>描述</th>
-                  <th>创建时间</th>
-                  <th>操作</th>
-                </tr>
-                <%
-                for(ProcessModel pm : processModelist){
-                	
-                %>
-                <tr>
-                  <td><%=pm.getId() %></td>
-                  <td><%=pm.getProcessDefinition().getId() %></td>
-                  <td><%=pm.getVersion() %></td>
-                  <td><%=pm.getName() %></td>
-                  <td><%=pm.getProcessDefinition().getDocumentation() %></td>
-                  <td><%=pm.getCreateDate() %></td>
-                  <td><button id="create_process" modelid='<%=pm.getId() %><' type="button" class="btn btn-info btn-sm">创建流程</button></td>
-                </tr>
-                <%
-                }
-                %>
-              </table>
-            </div>
-            <!-- /.box-body -->
+            <form name="" role="listForm"  method="post">
+	            <div class="box-body table-responsive no-padding">
+	              <table class="table table-hover">
+	                <tr>
+	                  <th>模板ID</th>
+	                  <th>流程定义</th>
+	                  <th>流程定义版本</th>
+	                  <th>名称</th>
+	                  <th>描述</th>
+	                  <th>创建时间</th>
+	                  <th>操作</th>
+	                </tr>
+	                <%
+	                for(ProcessModel pm : processModelist){
+	                	
+	                %>
+	                <tr>
+	                  <td><%=pm.getId() %></td>
+	                  <td><%=pm.getProcessDefinition().getId() %></td>
+	                  <td><%=pm.getVersion() %></td>
+	                  <td><%=pm.getName() %></td>
+	                  <td><%=pm.getProcessDefinition().getDocumentation() %></td>
+	                  <td><%=pm.getCreateDate() %></td>
+	                  <td><button id="create_process" modelId='<%=pm.getId() %>' type="button" class="btn btn-info btn-sm">创建流程</button></td>
+	                </tr>
+	                <%
+	                }
+	                %>
+	              </table>
+	            </div>
+	            <!-- /.box-body -->
+            </form>
           </div>
           <!-- /.box -->
 
@@ -296,20 +308,16 @@ $(document).ready(function() {
   $('#create_process').on('click',function (e) {
     e.preventDefault();
     
-    var modelid = $(this).attr('modelid');
-    
+    var modelIdValue = $(this).attr('modelId');
+    var actionName= "listProcessModel.jsp?isSubmit=1";
+    //var data=$('listForm').serialize();
+    var data = {modelId:modelIdValue};
+    $.post(actionName, data, function (result) { 
+      
+    });
   });
   
 });
-
-function PostAjaxContent(formName,actionName){
-  var data=$(formName).serialize();
-    $.post(actionName, data, function (result) { 
-      $('#ajax-content').html(result);
-    $('.preloader').hide();
-    }, "text");
-}
-
 
 </script>
 </body>

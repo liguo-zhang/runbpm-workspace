@@ -76,7 +76,7 @@ desired effect
       <!-- mini logo for sidebar mini 50x50 pixels -->
       <span class="logo-mini">R</span>
       <!-- logo for regular state and mobile devices -->
-      <span class="logo-lg">RunBPM工作台</span>
+      <span class="logo-lg"><img src="ui/images/runbpm-logo-workspace.png"></span>
     </a>
 
     <!-- Header Navbar -->
@@ -207,7 +207,7 @@ desired effect
     <section class="content">
        <div class="box">
             <div class="box-header">
-              <h3 class="box-title">流程模板列表</h3>
+              <h3 class="box-title">本人经手，且流程已结束的工作项</h3>
 
               <div class="box-tools">
                 <div class="input-group input-group-sm" style="width: 150px;">

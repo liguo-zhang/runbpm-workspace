@@ -10,11 +10,11 @@
 <%@ page import="org.runbpm.workspace.Upload" %>
 
 <%
-String isForm = request.getParameter("isForm")+"";
+String isSubmit = request.getParameter("isSubmit")+"";
 String code = null;
 String error = null;
 String result = null;
-if(isForm!=null&&isForm.trim().equals("1")){
+if(isSubmit!=null&&isSubmit.trim().equals("1")){
 	Upload upload = new Upload();
 	upload.uploadFileAndImportProcess(request, response);
 	code = request.getAttribute("code")+"";
@@ -88,7 +88,7 @@ desired effect
       <!-- mini logo for sidebar mini 50x50 pixels -->
       <span class="logo-mini">R</span>
       <!-- logo for regular state and mobile devices -->
-      <span class="logo-lg">RunBPM工作台</span>
+      <span class="logo-lg"><img src="ui/images/runbpm-logo-workspace.png"></span>
     </a>
 
     <!-- Header Navbar -->
@@ -232,7 +232,7 @@ desired effect
             </div>
             <!-- /.box-header -->
             <!-- form start -->
-            <form role="form" action="deployProcessDefinition.jsp?isForm=1"  enctype="multipart/form-data" method="post">
+            <form role="form" action="deployProcessDefinition.jsp?isSubmit=1"  enctype="multipart/form-data" method="post">
               <div class="box-body">
                 <div class="form-group">
                   <label for="exampleInputFile"></label>
@@ -323,7 +323,7 @@ desired effect
 
 $(function () {
 	<%
-	if(isForm!=null&&isForm.trim().equals("1")){
+	if(isSubmit!=null&&isSubmit.trim().equals("1")){
 		out.println("$('#deployResultModal').modal({keyboard: true});");
 	}
 	%>
