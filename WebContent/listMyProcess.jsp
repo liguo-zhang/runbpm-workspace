@@ -9,7 +9,7 @@
 <%@ page import="org.runbpm.service.RuntimeService" %>
 <%
 RuntimeService runtimeService = Configuration.getContext().getRuntimeService();
-List<ProcessModel> processModelist = runtimeService.loadProcessModels(false);
+List<ProcessModel> processModelist = runtimeService.loadProcessModels(true);
 %>
 
 <!DOCTYPE html>
@@ -25,24 +25,24 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <!-- Tell the browser to be responsive to screen width -->
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
   <!-- Bootstrap 3.3.6 -->
-  <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="ui/bootstrap/css/bootstrap.min.css">
   <!-- Font Awesome -->
-  <link rel="stylesheet" href="css/font-awesome.min.css">
+  <link rel="stylesheet" href="ui/css/font-awesome.min.css">
   <!-- Ionicons -->
-  <link rel="stylesheet" href="css/ionicons.min.css">
+  <link rel="stylesheet" href="ui/css/ionicons.min.css">
   <!-- Theme style -->
-  <link rel="stylesheet" href="dist/css/AdminLTE.min.css">
+  <link rel="stylesheet" href="ui/dist/css/AdminLTE.min.css">
   <!-- AdminLTE Skins. We have chosen the skin-blue for this starter
         page. However, you can choose any other skin. Make sure you
         apply the skin class to the body tag so the changes take effect.
   -->
-  <link rel="stylesheet" href="dist/css/skins/skin-blue.min.css">
+  <link rel="stylesheet" href="ui/dist/css/skins/skin-blue.min.css">
 
   <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
   <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
   <!--[if lt IE 9]>
-  <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-  <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+  <script src="ui/https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+  <script src="ui/https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
   <![endif]-->
 </head>
 <!--
@@ -145,28 +145,40 @@ desired effect
   
       <!-- Sidebar Menu -->
       <ul class="sidebar-menu">
-        <li class="header"></li>
-        
-	         <li class="treeview active">
-	          <a href="#">
-	            <i class="fa fa-table"></i> <span>流程定义</span>
-	            <i class="fa fa-angle-left pull-right"></i>
-	          </a>
-	          <ul class="treeview-menu">
-	          	<li class="active"><a href="deployProcessDefinition.jsp"><i class="fa fa-circle-o"></i> 导入流程</a></li>
-	          	<li><a href="pages/tables/data.html"><i class="fa fa-circle-o"></i> 创建流程</a></li>
-	          </ul>
-	        </li>
+        <li class="header">
         
 	         <li class="treeview">
 	          <a href="#">
-	            <i class="fa fa-table"></i> <span>代办列表</span>
+	            <i class="fa fa-table"></i> <span>流程管理</span>
 	            <i class="fa fa-angle-left pull-right"></i>
 	          </a>
 	          <ul class="treeview-menu">
-	          	<li><a href="pages/tables/data.html"><i class="fa fa-circle-o"></i> 创建流程</a></li>
-	            <li><a href="pages/tables/simple.html"><i class="fa fa-circle-o"></i> 代办任务</a></li>
-	            <li><a href="pages/tables/data.html"><i class="fa fa-circle-o"></i> 已办任务</a></li>
+	          	<li><a href="deployProcessDefinition.jsp"><i class="fa fa-circle-o"></i> 导入流程</a></li>
+	          	<li><a href="listProcessModel.jsp"><i class="fa fa-circle-o"></i> 创建流程</a></li>
+	          </ul>
+	        </li>
+	        
+	        <li><a href="listTask.jsp"><i class="fa fa-book"></i> <span>代办任务</span></a></li>
+	        
+	         <li class="treeview active">
+	          <a href="#">
+	            <i class="fa   fa-star-half-o"></i> <span>未结束流程</span>
+	            <i class="fa fa-angle-left pull-right"></i>
+	          </a>
+	          <ul class="treeview-menu">
+	            <li  class="active"><a href="listMyProcess.jsp"><i class="fa fa-circle-o"></i> 已建流程</a></li>
+	            <li><a href="listMyTask.jsp"><i class="fa fa-circle-o"></i> 已办任务</a></li>
+	          </ul>
+	        </li>
+	        
+	         <li class="treeview">
+	          <a href="#">
+	            <i class="fa  fa-star"></i> <span>已结束流程</span>
+	            <i class="fa fa-angle-left pull-right"></i>
+	          </a>
+	          <ul class="treeview-menu">
+	          <li><a href="listMyHistoryProcess.jsp"><i class="fa fa-circle-o"></i> 已建流程</a></li>
+	            <li><a href="listMyHistoryTask.jsp"><i class="fa fa-circle-o"></i> 已办任务</a></li>
 	          </ul>
 	        </li>
           
@@ -199,7 +211,7 @@ desired effect
 
               <div class="box-tools">
                 <div class="input-group input-group-sm" style="width: 150px;">
-                  <input type="text" name="table_search" class="form-control pull-right" placeholder="Search">
+                  <input type="text" name=" 	" class="form-control pull-right" placeholder="Search">
 
                   <div class="input-group-btn">
                     <button type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
@@ -213,38 +225,28 @@ desired effect
                 <tr>
                   <th>模板ID</th>
                   <th>流程定义</th>
+                  <th>流程定义版本</th>
                   <th>名称</th>
                   <th>描述</th>
                   <th>创建时间</th>
+                  <th>操作</th>
                 </tr>
+                <%
+                for(ProcessModel pm : processModelist){
+                	
+                %>
                 <tr>
-                  <td>183</td>
-                  <td>John Doe</td>
-                  <td>11-7-2014</td>
-                  <td><span class="label label-success">Approved</span></td>
-                  <td>Bacon ipsum dolor sit amet salami venison chicken flank fatback doner.</td>
+                  <td><%=pm.getId() %></td>
+                  <td><%=pm.getProcessDefinition().getId() %></td>
+                  <td><%=pm.getVersion() %></td>
+                  <td><%=pm.getName() %></td>
+                  <td><%=pm.getProcessDefinition().getDocumentation() %></td>
+                  <td><%=pm.getCreateDate() %></td>
+                  <td><button id="create_process" modelid='<%=pm.getId() %><' type="button" class="btn btn-info btn-sm">创建流程</button></td>
                 </tr>
-                <tr>
-                  <td>219</td>
-                  <td>Alexander Pierce</td>
-                  <td>11-7-2014</td>
-                  <td><span class="label label-warning">Pending</span></td>
-                  <td>Bacon ipsum dolor sit amet salami venison chicken flank fatback doner.</td>
-                </tr>
-                <tr>
-                  <td>657</td>
-                  <td>Bob Doe</td>
-                  <td>11-7-2014</td>
-                  <td><span class="label label-primary">Approved</span></td>
-                  <td>Bacon ipsum dolor sit amet salami venison chicken flank fatback doner.</td>
-                </tr>
-                <tr>
-                  <td>175</td>
-                  <td>Mike Doe</td>
-                  <td>11-7-2014</td>
-                  <td><span class="label label-danger">Denied</span></td>
-                  <td>Bacon ipsum dolor sit amet salami venison chicken flank fatback doner.</td>
-                </tr>
+                <%
+                }
+                %>
               </table>
             </div>
             <!-- /.box-body -->
@@ -277,15 +279,38 @@ desired effect
 <!-- REQUIRED JS SCRIPTS -->
 
 <!-- jQuery 2.2.0 -->
-<script src="plugins/jQuery/jQuery-2.2.0.min.js"></script>
+<script src="ui/plugins/jQuery/jQuery-2.2.0.min.js"></script>
 <!-- Bootstrap 3.3.6 -->
-<script src="bootstrap/js/bootstrap.min.js"></script>
+<script src="ui/bootstrap/js/bootstrap.min.js"></script>
 <!-- AdminLTE App -->
-<script src="dist/js/app.min.js"></script>
+<script src="ui/dist/js/app.min.js"></script>
 
 <!-- Optionally, you can add Slimscroll and FastClick plugins.
      Both of these plugins are recommended to enhance the
      user experience. Slimscroll is required when using the
      fixed layout. -->
+
+<script>
+
+$(document).ready(function() {
+  $('#create_process').on('click',function (e) {
+    e.preventDefault();
+    
+    var modelid = $(this).attr('modelid');
+    
+  });
+  
+});
+
+function PostAjaxContent(formName,actionName){
+  var data=$(formName).serialize();
+    $.post(actionName, data, function (result) { 
+      $('#ajax-content').html(result);
+    $('.preloader').hide();
+    }, "text");
+}
+
+
+</script>
 </body>
 </html>

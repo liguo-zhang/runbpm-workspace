@@ -7,22 +7,10 @@
 <%@ page import="org.runbpm.context.*" %>   
 <%@ page import="org.runbpm.entity.*" %>   
 <%@ page import="org.runbpm.service.RuntimeService" %>
-<%@ page import="org.runbpm.workspace.Upload" %>
-
 <%
-String isForm = request.getParameter("isForm")+"";
-String code = null;
-String error = null;
-String result = null;
-if(isForm!=null&&isForm.trim().equals("1")){
-	Upload upload = new Upload();
-	upload.uploadFileAndImportProcess(request, response);
-	code = request.getAttribute("code")+"";
-	error = request.getAttribute("error")+"";
-	result = request.getAttribute("result")+"";
-}
+RuntimeService runtimeService = Configuration.getContext().getRuntimeService();
+List<ProcessModel> processModelist = runtimeService.loadProcessModels(true);
 %>
-   
 
 <!DOCTYPE html>
 <!--
@@ -53,8 +41,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
   <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
   <!--[if lt IE 9]>
-  <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-  <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+  <script src="ui/https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+  <script src="ui/https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
   <![endif]-->
 </head>
 <!--
@@ -154,24 +142,18 @@ desired effect
 
     <!-- sidebar: style can be found in sidebar.less -->
     <section class="sidebar">
-    
-    <%
-	    RuntimeService runtimeService = Configuration.getContext().getRuntimeService();
-	    List list = runtimeService.loadProcessModels(true);
-	    //System.out.println(list.size());
-    %>
-
+  
       <!-- Sidebar Menu -->
       <ul class="sidebar-menu">
-        <li class="header"></li>
+        <li class="header">
         
-	          <li class="treeview active">
+	         <li class="treeview">
 	          <a href="#">
 	            <i class="fa fa-table"></i> <span>流程管理</span>
 	            <i class="fa fa-angle-left pull-right"></i>
 	          </a>
 	          <ul class="treeview-menu">
-	          	<li  class="active"><a href="deployProcessDefinition.jsp"><i class="fa fa-circle-o"></i> 导入流程</a></li>
+	          	<li ><a href="deployProcessDefinition.jsp"><i class="fa fa-circle-o"></i> 导入流程</a></li>
 	          	<li><a href="listProcessModel.jsp"><i class="fa fa-circle-o"></i> 创建流程</a></li>
 	          </ul>
 	        </li>
@@ -189,17 +171,16 @@ desired effect
 	          </ul>
 	        </li>
 	        
-	         <li class="treeview">
+	         <li class="treeview active">
 	          <a href="#">
 	            <i class="fa  fa-star"></i> <span>已结束流程</span>
 	            <i class="fa fa-angle-left pull-right"></i>
 	          </a>
 	          <ul class="treeview-menu">
-	          <li><a href="listMyHistoryProcess.jsp"><i class="fa fa-circle-o"></i> 已建流程</a></li>
+	          	<li class="active"><a href="listMyHistoryProcess.jsp"><i class="fa fa-circle-o"></i> 已建流程</a></li>
 	            <li><a href="listMyHistoryTask.jsp"><i class="fa fa-circle-o"></i> 已办任务</a></li>
 	          </ul>
 	        </li>
-          
           
         </li>
       </ul>
@@ -224,65 +205,53 @@ desired effect
 
     <!-- Main content -->
     <section class="content">
-      
-      <!-- general form elements -->
-          <div class="box box-primary">
-            <div class="box-header with-border">
-              <h3 class="box-title">部署流程定义</h3>
-            </div>
-            <!-- /.box-header -->
-            <!-- form start -->
-            <form role="form" action="deployProcessDefinition.jsp?isForm=1"  enctype="multipart/form-data" method="post">
-              <div class="box-body">
-                <div class="form-group">
-                  <label for="exampleInputFile"></label>
-                  <input type="file" name="processDefinitionFile">
-                  
+       <div class="box">
+            <div class="box-header">
+              <h3 class="box-title">流程模板列表</h3>
 
-                  <p class="help-block">选择XML格式的流程定义文件</p>
-                </div>
-               </div>
-              <!-- /.box-body -->
+              <div class="box-tools">
+                <div class="input-group input-group-sm" style="width: 150px;">
+                  <input type="text" name=" 	" class="form-control pull-right" placeholder="Search">
 
-              <div class="box-footer">
-                <button type="submit" class="btn btn-primary">Submit</button>
-              </div>
-            </form>
-          </div>
-          <!-- /.box -->
-          
-           <!-- Modal -->
-              <div class="modal fade" id="deployResultModal" tabindex="-1" role="dialog" aria-labelledby="deployResultModal">
-                <div class="modal-dialog" role="document">
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                      <h4 class="modal-title" id="deployResultModal">
-                      <%
-                      if("0".equals(code)){
-                    	  out.println("部署成功");
-                      }else{
-                    	  out.println("部署失败["+error+"]");
-                      }
-                      %>
-                      </h4>
-                    </div>
-                    <div class="modal-body">
-                      <% 
-                      if("0".equals(code)){
-                    	  out.println(result);
-                      }else{
-                    	  out.println(error);
-                      }
-                      %>
-                    </div>
-                    <div class="modal-footer">
-                      <button type="button" class="btn btn-primary"  data-dismiss="modal">关闭</button>
-                    </div>
+                  <div class="input-group-btn">
+                    <button type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
                   </div>
                 </div>
               </div>
-              <!--//Modal-->
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body table-responsive no-padding">
+              <table class="table table-hover">
+                <tr>
+                  <th>模板ID</th>
+                  <th>流程定义</th>
+                  <th>流程定义版本</th>
+                  <th>名称</th>
+                  <th>描述</th>
+                  <th>创建时间</th>
+                  <th>操作</th>
+                </tr>
+                <%
+                for(ProcessModel pm : processModelist){
+                	
+                %>
+                <tr>
+                  <td><%=pm.getId() %></td>
+                  <td><%=pm.getProcessDefinition().getId() %></td>
+                  <td><%=pm.getVersion() %></td>
+                  <td><%=pm.getName() %></td>
+                  <td><%=pm.getProcessDefinition().getDocumentation() %></td>
+                  <td><%=pm.getCreateDate() %></td>
+                  <td><button id="create_process" modelid='<%=pm.getId() %><' type="button" class="btn btn-info btn-sm">创建流程</button></td>
+                </tr>
+                <%
+                }
+                %>
+              </table>
+            </div>
+            <!-- /.box-body -->
+          </div>
+          <!-- /.box -->
 
     </section>
     <!-- /.content -->
@@ -307,8 +276,6 @@ desired effect
 </div>
 <!-- ./wrapper -->
 
-
-
 <!-- REQUIRED JS SCRIPTS -->
 
 <!-- jQuery 2.2.0 -->
@@ -318,24 +285,32 @@ desired effect
 <!-- AdminLTE App -->
 <script src="ui/dist/js/app.min.js"></script>
 
-
-<script>
-
-$(function () {
-	<%
-	if(isForm!=null&&isForm.trim().equals("1")){
-		out.println("$('#deployResultModal').modal({keyboard: true});");
-	}
-	%>
-	
-});
-
-</script>
-
-
 <!-- Optionally, you can add Slimscroll and FastClick plugins.
      Both of these plugins are recommended to enhance the
      user experience. Slimscroll is required when using the
      fixed layout. -->
+
+<script>
+
+$(document).ready(function() {
+  $('#create_process').on('click',function (e) {
+    e.preventDefault();
+    
+    var modelid = $(this).attr('modelid');
+    
+  });
+  
+});
+
+function PostAjaxContent(formName,actionName){
+  var data=$(formName).serialize();
+    $.post(actionName, data, function (result) { 
+      $('#ajax-content').html(result);
+    $('.preloader').hide();
+    }, "text");
+}
+
+
+</script>
 </body>
 </html>
