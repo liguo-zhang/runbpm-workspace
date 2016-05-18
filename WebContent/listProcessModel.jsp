@@ -2,7 +2,7 @@
     pageEncoding="UTF-8"%>
 
 <%@ page import="java.util.*" %>   
-<%@ page import="java.util.*" %>   
+<%@ page import="java.io.*" %>
    
 <%@ page import="org.runbpm.context.*" %>   
 <%@ page import="org.runbpm.entity.*" %>   
@@ -13,11 +13,25 @@ List<ProcessModel> processModelist = runtimeService.loadProcessModels(true);
 
 //判断是否需要提交
 String isSubmit = request.getParameter("isSubmit")+"";
+String code = null;
+String result = null;
 if(isSubmit!=null&&isSubmit.trim().equals("1")){
 	//String modelId = request.getAttribute("modelId")+"";
 	String modelId = request.getParameter("modelId")+"";
-	System.out.println(modelId);
-	runtimeService.createAndStartProcessInstance(Long.parseLong(modelId), "111");
+	ProcessInstance processInstance = runtimeService.createAndStartProcessInstance(Long.parseLong(modelId), "111");
+	
+	 response.setCharacterEncoding("UTF-8");
+	response.setContentType("application/json; charset=utf-8");
+	PrintWriter printWriter = response.getWriter();
+	
+	
+	code = "0";
+	result =  "创建并启动成功。流程实例ID为["+processInstance.getId()+"],流程名称为["+processInstance.getName()+"]";
+	
+	
+	String json = "{ number:10,str:'abc'}";
+	response.getWriter().write(json);
+	
 }
 
 %>
@@ -253,9 +267,10 @@ desired effect
 	                  <td><%=pm.getName() %></td>
 	                  <td><%=pm.getProcessDefinition().getDocumentation() %></td>
 	                  <td><%=pm.getCreateDate() %></td>
-	                  <td><button id="create_process" modelId='<%=pm.getId() %>' type="button" class="btn btn-info btn-sm">创建流程</button></td>
+	                  <td><button id="create_process_<%=pm.getId() %>" modelId='<%=pm.getId() %>' type="button" class="btn btn-info btn-sm">创建流程</button></td>
 	                </tr>
 	                <%
+	                
 	                }
 	                %>
 	              </table>
@@ -264,6 +279,37 @@ desired effect
             </form>
           </div>
           <!-- /.box -->
+          
+          <!-- Modal -->
+              <div class="modal fade" id="deployResultModal" tabindex="-1" role="dialog" aria-labelledby="deployResultModal">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                      <h4 class="modal-title" id="deployResultModal">
+                      <%
+                      if("0".equals(code)){
+                    	  out.println("创建流程成功");
+                      }else{
+                    	  out.println("创建流程失败["+result+"]");
+                      }
+                      %>
+                      </h4>
+                    </div>
+                    <div class="modal-body">
+                      <% 
+                      
+                    	out.println(result);
+                      
+                      %>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-primary"  data-dismiss="modal">关闭</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!--//Modal-->
 
     </section>
     <!-- /.content -->
@@ -301,22 +347,26 @@ desired effect
      Both of these plugins are recommended to enhance the
      user experience. Slimscroll is required when using the
      fixed layout. -->
-
 <script>
-
 $(document).ready(function() {
-  $('#create_process').on('click',function (e) {
-    e.preventDefault();
+	
+	$("button[id^='create_process']").each(function(i){
+		
+		 $(this).on('click',function (e) {
+		    e.preventDefault();
+		    
+		    var modelIdValue = $(this).attr('modelId');
+		    var actionName= "createProcess.jsp";
+		    var data = {modelId:modelIdValue};
+		    alert(11);
+		    $.post(actionName, data, function (result) {
+		    	alert(result);
+		        alert("success");
+		        $('#deployResultModal').modal({keyboard: true});
+		    });
+		});
+	});
     
-    var modelIdValue = $(this).attr('modelId');
-    var actionName= "listProcessModel.jsp?isSubmit=1";
-    //var data=$('listForm').serialize();
-    var data = {modelId:modelIdValue};
-    $.post(actionName, data, function (result) { 
-      
-    });
-  });
-  
 });
 
 </script>

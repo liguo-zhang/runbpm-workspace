@@ -8,18 +8,18 @@
 <%@ page import="org.runbpm.entity.*" %>   
 <%@ page import="org.runbpm.service.RuntimeService" %>
 <%@ page import="org.runbpm.workspace.Upload" %>
+<%@ page import="org.runbpm.workspace.ResultBean" %>
 
 <%
 String isSubmit = request.getParameter("isSubmit")+"";
 String code = null;
-String error = null;
 String result = null;
+ResultBean rb = null;
 if(isSubmit!=null&&isSubmit.trim().equals("1")){
 	Upload upload = new Upload();
-	upload.uploadFileAndImportProcess(request, response);
-	code = request.getAttribute("code")+"";
-	error = request.getAttribute("error")+"";
-	result = request.getAttribute("result")+"";
+	rb = upload.uploadFileAndImportProcess(request, response);
+	code = rb.getCode();
+	result = rb.getResult();
 }
 %>
    
@@ -262,18 +262,14 @@ desired effect
                       if("0".equals(code)){
                     	  out.println("部署成功");
                       }else{
-                    	  out.println("部署失败["+error+"]");
+                    	  out.println("部署失败["+result+"]");
                       }
                       %>
                       </h4>
                     </div>
                     <div class="modal-body">
                       <% 
-                      if("0".equals(code)){
-                    	  out.println(result);
-                      }else{
-                    	  out.println(error);
-                      }
+                    	 out.println(result);
                       %>
                     </div>
                     <div class="modal-footer">

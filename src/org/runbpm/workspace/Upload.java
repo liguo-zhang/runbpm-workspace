@@ -32,7 +32,7 @@ public class Upload {
 	private static final long serialVersionUID = 1L;
 
 	
-	public void uploadFileAndImportProcess(HttpServletRequest request, HttpServletResponse response)
+	public ResultBean uploadFileAndImportProcess(HttpServletRequest request, HttpServletResponse response)
         throws ServletException, IOException {
 		    
 		    HttpSession session=request.getSession();
@@ -94,18 +94,24 @@ public class Upload {
 		    	}
 		    }
 		    
+		    ResultBean rb = new ResultBean();
+		    
 		    if (!"".equals(error)) {
-		    	request.setAttribute("code", "1");
-		        request.setAttribute("error", error);
-		        //request.getRequestDispatcher("error.jsp").forward(request, response);
+//		    	request.setAttribute("code", "1");
+//		        request.setAttribute("result", error);
+		    	rb.setCode("1");
+		    	rb.setResult(error);
 		    }else {
 		    	long id = processModel.getId();
 		    	String defId = processModel.getProcessDefinition().getId();
 		    	String name = processModel.getProcessDefinition().getName();
-		    	request.setAttribute("code", "0");
-		        request.setAttribute("result", "部署成功。流程定义ID为["+defId+"],流程定义名称为["+name+"],生成的流程模板ID为["+id+"]。");
-		        //request.getRequestDispatcher("upFile_deal.jsp").forward(request, response);
+		    	rb.setCode("0");
+		    	rb.setResult("部署成功。流程定义ID为["+defId+"],流程定义名称为["+name+"],生成的流程模板ID为["+id+"]。");
+//		    	request.setAttribute("code", "0");
+//		        request.setAttribute("result", "部署成功。流程定义ID为["+defId+"],流程定义名称为["+name+"],生成的流程模板ID为["+id+"]。");
 		    }
+		    
+		    return rb;
 	}
     
  }
