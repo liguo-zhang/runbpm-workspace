@@ -20,18 +20,9 @@ if(isSubmit!=null&&isSubmit.trim().equals("1")){
 	String modelId = request.getParameter("modelId")+"";
 	ProcessInstance processInstance = runtimeService.createAndStartProcessInstance(Long.parseLong(modelId), "111");
 	
-	 response.setCharacterEncoding("UTF-8");
-	response.setContentType("application/json; charset=utf-8");
-	PrintWriter printWriter = response.getWriter();
-	
-	
 	code = "0";
 	result =  "创建并启动成功。流程实例ID为["+processInstance.getId()+"],流程名称为["+processInstance.getName()+"]";
-	
-	
-	String json = "{ number:10,str:'abc'}";
-	response.getWriter().write(json);
-	
+	System.out.println(result);
 }
 
 %>
@@ -244,7 +235,9 @@ desired effect
               </div>
             </div>
             <!-- /.box-header -->
-            <form name="" role="listForm"  method="post">
+            <form id="listForm" action="" method="post">
+            	<input type="hidden" id="hiddenModelId"/>
+            </form>
 	            <div class="box-body table-responsive no-padding">
 	              <table class="table table-hover">
 	                <tr>
@@ -276,7 +269,7 @@ desired effect
 	              </table>
 	            </div>
 	            <!-- /.box-body -->
-            </form>
+            
           </div>
           <!-- /.box -->
           
@@ -350,20 +343,29 @@ desired effect
 <script>
 $(document).ready(function() {
 	
+	<%
+	if(isSubmit!=null&&isSubmit.trim().equals("1")){
+		out.println("$('#deployResultModal').modal({keyboard: true});");
+	}
+	%>
+	
+	
 	$("button[id^='create_process']").each(function(i){
 		
 		 $(this).on('click',function (e) {
 		    e.preventDefault();
+		    alert(11);
 		    
 		    var modelIdValue = $(this).attr('modelId');
-		    var actionName= "createProcess.jsp";
-		    var data = {modelId:modelIdValue};
-		    alert(11);
-		    $.post(actionName, data, function (result) {
-		    	alert(result);
-		        alert("success");
-		        $('#deployResultModal').modal({keyboard: true});
-		    });
+		    $("#hiddenModelId").val(modelIdValue);
+		    
+		    var actionName= "";
+		    //var data = {modelId:modelIdValue};
+		    
+		    $('#listform').attr('action', 'listProcessModel.jsp?isSubmit=1');
+
+		    $('#listform').submit();
+		    
 		});
 	});
     
