@@ -2,14 +2,106 @@
     pageEncoding="UTF-8"%>
 
 <%@ page import="java.util.*" %>   
-<%@ page import="java.util.*" %>   
    
 <%@ page import="org.runbpm.context.*" %>   
 <%@ page import="org.runbpm.entity.*" %>   
+<%@ page import="org.runbpm.bpmn.definition.*" %>   
+<%@ page import="org.runbpm.workspace.*" %>
 <%@ page import="org.runbpm.service.RuntimeService" %>
+
 <%
 RuntimeService runtimeService = Configuration.getContext().getRuntimeService();
-List<ProcessModel> processModelist = runtimeService.loadProcessModels(true);
+
+//是否从登陆界面过来的，如果是的话，需要记录session begin-->
+Object userIdFromRequest = request.getParameter("userId");
+if(userIdFromRequest!=null&&userIdFromRequest.toString().length()>0){
+	System.out.println(userIdFromRequest);
+	session.setAttribute("userId", userIdFromRequest);
+	
+}
+//是否从登陆界面过来的，如果是的话，需要记录session end<--
+
+//判断session，记录userId
+Object userIdinSession = session.getAttribute("userId");
+String userId = null;
+if(userIdinSession!=null){
+	userId = userIdinSession.toString();
+}else{
+	response.sendRedirect("login.jsp");
+}
+
+//-----获取代办任务列表 开始-->
+EnumSet<EntityConstants.TASK_STATE> stateSet = EnumSet.noneOf(EntityConstants.TASK_STATE.class);  
+stateSet.add(EntityConstants.TASK_STATE.NOT_STARTED);  
+stateSet.add(EntityConstants.TASK_STATE.RUNNING);
+List<TaskInstance> taskList = runtimeService.listTaskInstanceByUserIdAndState(userId, stateSet);
+//-----获取代办任务列表 结束<-- 
+
+//----以下是 判断接受任务、接受任务、转到任务处理界面的逻辑
+String taskInstanceId = request.getParameter("taskInstanceId");
+String isSubmit = request.getParameter("isSubmit")+"";
+boolean showClaimTask = false;
+boolean sendRedirect=false;//是否转到任务界面
+if(isSubmit!=null&&isSubmit.trim().equals("1")){
+	TaskInstance taskInstance = runtimeService.loadTaskInstance(Long.parseLong(taskInstanceId));
+	if(taskInstance.getState().equals(EntityConstants.TASK_STATE.NOT_STARTED)){
+		//需要显示接受任务界面
+		showClaimTask = true;
+	}else if(taskInstance.getState().equals(EntityConstants.TASK_STATE.RUNNING)){
+		//需要转发到处理任务界面
+		sendRedirect=true;
+	}
+}
+String isClaim = request.getParameter("isClaim")+"";
+if(isClaim!=null&&isClaim.trim().equals("1")){
+	//处理任务（抢任务），将该任务置于我的名下，任务状态从“未开始”转化为“运行中”
+	runtimeService.claimUserTask(Long.parseLong(taskInstanceId));
+	sendRedirect=true;
+}
+
+//转发到任务处理界面 开始-->
+if(sendRedirect){
+	TaskInstance taskInstance = runtimeService.loadTaskInstance(Long.parseLong(taskInstanceId));
+	ProcessModel processModel =runtimeService.loadProcessModelByModelId(taskInstance.getProcessModelId());
+	ActivityDefinition activityDefinition = processModel.getProcessDefinition().getActivity(taskInstance.getActivityDefinitionId());
+	ExtensionElements extensionElements = activityDefinition.getExtensionElements();
+	Map templateMap = extensionElements.getExtensionPropsMap("runBPM_ApplicationTemplate_Definition");
+	
+	
+	String url = null;
+	if(templateMap!=null){
+		if("appliation_operation".equals(templateMap.get("type").toString())){
+			String applicationMapString = templateMap.get("applicationMap").toString();
+			 StringTokenizer st = new StringTokenizer(applicationMapString,",");
+			 int i =0;
+		     while (st.hasMoreTokens()) {
+		    	 	st.nextToken();
+		         i++;
+		     } 
+		     if(i==1){
+		    	 	url="listApplicationTemplate1.jsp"+"?taskInstanceId="+taskInstanceId; 
+		     }else if(i==2){
+		    	 	url="listApplicationTemplate2.jsp"+"?taskInstanceId="+taskInstanceId; 
+		     }
+		}
+	}else{
+		 url = extensionElements.getPropertyValue("application")+"?taskInstanceId="+taskInstanceId;
+	}
+	
+	
+	response.sendRedirect(url);
+}
+//转发到任务处理界面 结束<--
+
+//是否由提交任务界面过来，如果是的话，需要显示处理成功的提示 begin-->
+boolean completeTask = false;
+String isCompleteTask = request.getParameter("isCompleteTask")+"";
+if(isCompleteTask!=null&&isCompleteTask.trim().equals("1")){
+	completeTask = true;
+}
+//是否由提交任务界面过来，如果是的话，需要显示处理成功的提示 end<--
+
+
 %>
 
 <!DOCTYPE html>
@@ -95,20 +187,19 @@ desired effect
               <!-- The user image in the navbar-->
               <i class="fa fa-user"></i> 
               <!-- hidden-xs hides the username on small devices so only the image appears. -->
-              <span class="hidden-xs">aaa</span>
+              <span class="hidden-xs"><%=userId%></span>
             </a>
             <ul class="dropdown-menu">
               <!-- The user image in the menu -->
               <li class="user-header">
-                <img src="dist/img/user2-160x160.jpg" class="img-circle" alt="User Image">
-
+                <img style="display:none" src="ui/images/runbpm-logo-workspace.png" alt="User Image">
                 <p>
-                  Alexander Pierce - Web Developer
-                  <small>Member since Nov. 2012</small>
+                  RunBPM工作台用户
+                  <small>RunBPM v1.0 @ 2018</small>
                 </p>
               </li>
               <!-- Menu Body -->
-              <li class="user-body">
+              <li class="user-body" style="display:none">
                 <div class="row">
                   <div class="col-xs-4 text-center">
                     <a href="#">Followers</a>
@@ -124,11 +215,11 @@ desired effect
               </li>
               <!-- Menu Footer-->
               <li class="user-footer">
-                <div class="pull-left">
+                <div class="pull-left" style="display:none">
                   <a href="#" class="btn btn-default btn-flat">Profile</a>
                 </div>
                 <div class="pull-right">
-                  <a href="#" class="btn btn-default btn-flat">Sign out</a>
+                  <a href="login.jsp" class="btn btn-default btn-flat">Sign out</a>
                 </div>
               </li>
             </ul>
@@ -158,16 +249,16 @@ desired effect
 	          </ul>
 	        </li>
 	        
-	        <li><a href="listTask.jsp"><i class="fa fa-book"></i> <span>代办任务</span></a></li>
+	        <li class="active"><a href="listMyTask.jsp"><i class="fa fa-book"></i> <span>代办任务</span></a></li>
 	        
-	         <li class="treeview active">
+	         <li class="treeview">
 	          <a href="#">
 	            <i class="fa   fa-star-half-o"></i> <span>未结束流程</span>
 	            <i class="fa fa-angle-left pull-right"></i>
 	          </a>
 	          <ul class="treeview-menu">
 	            <li><a href="listMyProcess.jsp"><i class="fa fa-circle-o"></i> 已建流程</a></li>
-	            <li class="active"><a href="listMyTask.jsp"><i class="fa fa-circle-o"></i> 已办任务</a></li>
+	            <li><a href="listMyTaskCompleted.jsp"><i class="fa fa-circle-o"></i> 已办任务</a></li>
 	          </ul>
 	        </li>
 	        
@@ -177,8 +268,8 @@ desired effect
 	            <i class="fa fa-angle-left pull-right"></i>
 	          </a>
 	          <ul class="treeview-menu">
-	          <li><a href="listMyHistoryProcess.jsp"><i class="fa fa-circle-o"></i> 已建流程</a></li>
-	            <li><a href="listMyHistoryTask.jsp"><i class="fa fa-circle-o"></i> 已办任务</a></li>
+	          <li><a href="listMyProcessHistory.jsp"><i class="fa fa-circle-o"></i> 已建流程</a></li>
+	            <li><a href="listMyTaskHistory.jsp"><i class="fa fa-circle-o"></i> 已办任务</a></li>
 	          </ul>
 	        </li>
           
@@ -192,12 +283,12 @@ desired effect
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
     <!-- Content Header (Page header) -->
-    <section class="content-header" style="display:none">
+    <section class="content-header">
       <h1>
-        Page Header
-        <small>Optional description</small>
+        代办任务
+        <small>需要本人经手，且流程未结束的工作项</small>
       </h1>
-      <ol class="breadcrumb">
+      <ol class="breadcrumb" style="display:none">
         <li><a href="#"><i class="fa fa-dashboard"></i> Level</a></li>
         <li class="active">Here</li>
       </ol>
@@ -205,9 +296,9 @@ desired effect
 
     <!-- Main content -->
     <section class="content">
-       <div class="box">
-            <div class="box-header">
-              <h3 class="box-title">本人经手，且流程未结束的工作项</h3>
+       <div class="box" >
+            <div class="box-header" style="display:none">
+              <h3 class="box-title"></h3>
 
               <div class="box-tools">
                 <div class="input-group input-group-sm" style="width: 150px;">
@@ -221,28 +312,28 @@ desired effect
             </div>
             <!-- /.box-header -->
             <div class="box-body table-responsive no-padding">
-              <table class="table table-hover">
+               <table class="table table-hover">
                 <tr>
-                  <th>模板ID</th>
-                  <th>流程定义</th>
-                  <th>流程定义版本</th>
+                  <th>工作项实例ID</th>
                   <th>名称</th>
-                  <th>描述</th>
+                  <th>执行者</th>
+                  <th>流程实例ID</th>
+                  <th>流程定义</th>
+                  <th>状态</th>
                   <th>创建时间</th>
-                  <th>操作</th>
                 </tr>
                 <%
-                for(ProcessModel pm : processModelist){
+                for(TaskInstance taskInstance : taskList){
                 	
                 %>
                 <tr>
-                  <td><%=pm.getId() %></td>
-                  <td><%=pm.getProcessDefinition().getId() %></td>
-                  <td><%=pm.getVersion() %></td>
-                  <td><%=pm.getName() %></td>
-                  <td><%=pm.getProcessDefinition().getDocumentation() %></td>
-                  <td><%=pm.getCreateDate() %></td>
-                  <td><button id="create_process" modelid='<%=pm.getId() %><' type="button" class="btn btn-info btn-sm">创建流程</button></td>
+                  <td><%=taskInstance.getId() %></td>
+                  <td><a href="listMyTask.jsp?isSubmit=1&taskInstanceId=<%=taskInstance.getId() %>"><%=taskInstance.getName() %></a></td>
+                  <td><%=taskInstance.getUserId() %></td>
+                  <td><%=taskInstance.getProcessInstanceId() %></td>
+                  <td><%=taskInstance.getProcessDefinitionId() %></td>
+                  <td><%=ConstantsUtil.getStateString(taskInstance.getState()) %></td>
+                  <td><%=taskInstance.getCreateDate() %></td>
                 </tr>
                 <%
                 }
@@ -252,6 +343,46 @@ desired effect
             <!-- /.box-body -->
           </div>
           <!-- /.box -->
+          
+          <!-- Modal -->
+              <div class="modal fade" id="hiddenModal" tabindex="-1" role="dialog" aria-labelledby="deployResultModal">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                      <h4 class="modal-title" id="deployResultModal">接受任务</h4>
+                     
+                    </div>
+                    <div class="modal-body">
+                      是否接受任务？
+                    </div>
+                    <div class="modal-footer">
+                    	  <button type="button" id="claimTask" class="btn btn-primary">接受</button>
+                      <button type="button" class="btn btn-default"  data-dismiss="modal">取消</button>
+                      <form id="submit_form" method="post"></form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="modal fade" id="infoModal" tabindex="-1" role="dialog" aria-labelledby="deployResultModal">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                      <h4 class="modal-title" id="deployResultModal">成功提交任务</h4>
+                    </div>
+                    <div class="modal-body">
+                      已经成功提交任务。
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-primary"  data-dismiss="modal">关闭</button>
+                      <form id="submit_form" method="post"></form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!--//Modal-->
 
     </section>
     <!-- /.content -->
@@ -293,22 +424,25 @@ desired effect
 <script>
 
 $(document).ready(function() {
-  $('#create_process').on('click',function (e) {
-    e.preventDefault();
-    
-    var modelid = $(this).attr('modelid');
-    
-  });
-  
+	<%
+	if(showClaimTask){
+		out.println("$('#hiddenModal').modal({keyboard: true});");
+	}
+	if(completeTask){
+		out.println("$('#infoModal').modal({keyboard: true});");
+	}
+	%>
+	
+	
+	 $("#claimTask").on('click',function (e) {
+		    
+		    var action = 'listMyTask.jsp?isClaim=1&taskInstanceId='+<%=taskInstanceId%>;
+		    $('#submit_form').attr('action', action);
+		    $("#submit_form").submit();
+		    
+		    
+	});
 });
-
-function PostAjaxContent(formName,actionName){
-  var data=$(formName).serialize();
-    $.post(actionName, data, function (result) { 
-      $('#ajax-content').html(result);
-    $('.preloader').hide();
-    }, "text");
-}
 
 
 </script>

@@ -1,15 +1,37 @@
+<%
+//判断session，记录userId. begin-->
+Object userIdinSession = session.getAttribute("userId");
+String userId = null;
+if(userIdinSession!=null){
+	userId = userIdinSession.toString();
+}else{
+	response.sendRedirect("login.jsp");
+}
+//判断session，记录userId. end-->
+%>
+
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 
 <%@ page import="java.util.*" %>   
-<%@ page import="java.util.*" %>   
+
    
 <%@ page import="org.runbpm.context.*" %>   
 <%@ page import="org.runbpm.entity.*" %>   
+<%@ page import="org.runbpm.bpmn.definition.*" %>   
+<%@ page import="org.runbpm.workspace.*" %>
 <%@ page import="org.runbpm.service.RuntimeService" %>
+
 <%
 RuntimeService runtimeService = Configuration.getContext().getRuntimeService();
-List<ProcessModel> processModelist = runtimeService.loadProcessModels(true);
+//-----获取历史任务列表 开始-->
+EnumSet<EntityConstants.TASK_STATE> stateSet = EnumSet.noneOf(EntityConstants.TASK_STATE.class);  
+stateSet.add(EntityConstants.TASK_STATE.COMPLETED);
+stateSet.add(EntityConstants.TASK_STATE.TERMINATED);
+stateSet.add(EntityConstants.TASK_STATE.CANCELED);
+List<TaskInstance> taskList = runtimeService.listTaskInstanceByUserIdAndState(userId, stateSet);
+//-----获取历史任务列表 结束<-- 
+
 %>
 
 <!DOCTYPE html>
@@ -95,20 +117,19 @@ desired effect
               <!-- The user image in the navbar-->
               <i class="fa fa-user"></i> 
               <!-- hidden-xs hides the username on small devices so only the image appears. -->
-              <span class="hidden-xs">aaa</span>
+              <span class="hidden-xs"><%=userId%></span>
             </a>
             <ul class="dropdown-menu">
               <!-- The user image in the menu -->
               <li class="user-header">
-                <img src="dist/img/user2-160x160.jpg" class="img-circle" alt="User Image">
-
+                <img style="display:none" src="ui/images/runbpm-logo-workspace.png" alt="User Image">
                 <p>
-                  Alexander Pierce - Web Developer
-                  <small>Member since Nov. 2012</small>
+                  RunBPM工作台用户
+                  <small>RunBPM v1.0 @ 2018</small>
                 </p>
               </li>
               <!-- Menu Body -->
-              <li class="user-body">
+              <li class="user-body" style="display:none">
                 <div class="row">
                   <div class="col-xs-4 text-center">
                     <a href="#">Followers</a>
@@ -124,11 +145,11 @@ desired effect
               </li>
               <!-- Menu Footer-->
               <li class="user-footer">
-                <div class="pull-left">
+                <div class="pull-left" style="display:none">
                   <a href="#" class="btn btn-default btn-flat">Profile</a>
                 </div>
                 <div class="pull-right">
-                  <a href="#" class="btn btn-default btn-flat">Sign out</a>
+                  <a href="login.jsp" class="btn btn-default btn-flat">Sign out</a>
                 </div>
               </li>
             </ul>
@@ -158,7 +179,7 @@ desired effect
 	          </ul>
 	        </li>
 	        
-	        <li><a href="listTask.jsp"><i class="fa fa-book"></i> <span>代办任务</span></a></li>
+	        <li><a href="listMyTask.jsp"><i class="fa fa-book"></i> <span>代办任务</span></a></li>
 	        
 	         <li class="treeview">
 	          <a href="#">
@@ -167,7 +188,7 @@ desired effect
 	          </a>
 	          <ul class="treeview-menu">
 	            <li><a href="listMyProcess.jsp"><i class="fa fa-circle-o"></i> 已建流程</a></li>
-	            <li><a href="listMyTask.jsp"><i class="fa fa-circle-o"></i> 已办任务</a></li>
+	            <li><a href="listMyTaskCompleted.jsp"><i class="fa fa-circle-o"></i> 已办任务</a></li>
 	          </ul>
 	        </li>
 	        
@@ -177,8 +198,8 @@ desired effect
 	            <i class="fa fa-angle-left pull-right"></i>
 	          </a>
 	          <ul class="treeview-menu">
-	          	<li><a href="listMyHistoryProcess.jsp"><i class="fa fa-circle-o"></i> 已建流程</a></li>
-	            <li class="active"><a href="listMyHistoryTask.jsp"><i class="fa fa-circle-o"></i> 已办任务</a></li>
+	          	<li><a href="listMyProcessHistory.jsp"><i class="fa fa-circle-o"></i> 已建流程</a></li>
+	            <li class="active"><a href="listMyTaskHistory.jsp"><i class="fa fa-circle-o"></i> 已办任务</a></li>
 	          </ul>
 	        </li>
           
@@ -207,42 +228,35 @@ desired effect
     <section class="content">
        <div class="box">
             <div class="box-header">
-              <h3 class="box-title">本人经手，且流程已结束的工作项</h3>
-
-              <div class="box-tools">
-                <div class="input-group input-group-sm" style="width: 150px;">
-                  <input type="text" name=" 	" class="form-control pull-right" placeholder="Search">
-
-                  <div class="input-group-btn">
-                    <button type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
-                  </div>
-                </div>
-              </div>
+              <h3 class="box-title">本人经手，且流程已结束的工作项</h3>             
             </div>
             <!-- /.box-header -->
+            
+            	  
             <div class="box-body table-responsive no-padding">
-              <table class="table table-hover">
+               <table class="table table-hover">
                 <tr>
-                  <th>模板ID</th>
-                  <th>流程定义</th>
-                  <th>流程定义版本</th>
+                  <th>工作项实例ID</th>
                   <th>名称</th>
-                  <th>描述</th>
+                  <th>执行者</th>
+                  <th>流程实例ID</th>
+                  <th>流程定义</th>
+                  <th>状态</th>
                   <th>创建时间</th>
-                  <th>操作</th>
+                  <th>结束时间</th>
                 </tr>
                 <%
-                for(ProcessModel pm : processModelist){
-                	
+                for(TaskInstance taskInstance : taskList){
                 %>
                 <tr>
-                  <td><%=pm.getId() %></td>
-                  <td><%=pm.getProcessDefinition().getId() %></td>
-                  <td><%=pm.getVersion() %></td>
-                  <td><%=pm.getName() %></td>
-                  <td><%=pm.getProcessDefinition().getDocumentation() %></td>
-                  <td><%=pm.getCreateDate() %></td>
-                  <td><button id="create_process" modelid='<%=pm.getId() %><' type="button" class="btn btn-info btn-sm">创建流程</button></td>
+                  <td><%=taskInstance.getId() %></td>
+                  <td><%=taskInstance.getName() %></td>
+                  <td><%=taskInstance.getUserId() %></td>
+                  <td><%=taskInstance.getProcessInstanceId() %></td>
+                  <td><%=taskInstance.getProcessDefinitionId() %></td>
+                  <td><%=ConstantsUtil.getStateString(taskInstance.getState()) %></td>
+                  <td><%=taskInstance.getCreateDate() %></td>
+                  <td><%=taskInstance.getCompleteDate() %></td>
                 </tr>
                 <%
                 }
@@ -293,22 +307,10 @@ desired effect
 <script>
 
 $(document).ready(function() {
-  $('#create_process').on('click',function (e) {
-    e.preventDefault();
-    
-    var modelid = $(this).attr('modelid');
-    
-  });
+ 
   
 });
 
-function PostAjaxContent(formName,actionName){
-  var data=$(formName).serialize();
-    $.post(actionName, data, function (result) { 
-      $('#ajax-content').html(result);
-    $('.preloader').hide();
-    }, "text");
-}
 
 
 </script>

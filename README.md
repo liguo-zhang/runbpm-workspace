@@ -5,5 +5,6 @@
 
 2015-05-14 完成调用引擎API流程定义导入功能。
 
+http://localhost:8080/runbpm-workspace/deployProcessDefinition.jsp
 
 ![demo application screenshot](https://github.com/liguo-zhang/runbpm-workspace/blob/master/docs/screenshot-workspace.png)

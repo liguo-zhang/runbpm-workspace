@@ -1,3 +1,15 @@
+<%
+//判断session，记录userId. begin-->
+Object userIdinSession = session.getAttribute("userId");
+String userId = null;
+if(userIdinSession!=null){
+	userId = userIdinSession.toString();
+}else{
+	response.sendRedirect("login.jsp");
+}
+//判断session，记录userId. end-->
+%>
+
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 
@@ -15,10 +27,12 @@ List<ProcessModel> processModelist = runtimeService.loadProcessModels(true);
 String isSubmit = request.getParameter("isSubmit")+"";
 String code = null;
 String result = null;
+System.out.println("isSubmit----"+isSubmit);
+
 if(isSubmit!=null&&isSubmit.trim().equals("1")){
-	//String modelId = request.getAttribute("modelId")+"";
 	String modelId = request.getParameter("modelId")+"";
-	ProcessInstance processInstance = runtimeService.createAndStartProcessInstance(Long.parseLong(modelId), "111");
+	
+	ProcessInstance processInstance = runtimeService.createAndStartProcessInstance(Long.parseLong(modelId), userId);
 	
 	code = "0";
 	result =  "创建并启动成功。流程实例ID为["+processInstance.getId()+"],流程名称为["+processInstance.getName()+"]";
@@ -110,20 +124,19 @@ desired effect
               <!-- The user image in the navbar-->
               <i class="fa fa-user"></i> 
               <!-- hidden-xs hides the username on small devices so only the image appears. -->
-              <span class="hidden-xs">aaa</span>
+              <span class="hidden-xs"><%=userId%></span>
             </a>
             <ul class="dropdown-menu">
               <!-- The user image in the menu -->
               <li class="user-header">
-                <img src="dist/img/user2-160x160.jpg" class="img-circle" alt="User Image">
-
+                <img style="display:none" src="ui/images/runbpm-logo-workspace.png" alt="User Image">
                 <p>
-                  Alexander Pierce - Web Developer
-                  <small>Member since Nov. 2012</small>
+                  RunBPM工作台用户
+                  <small>RunBPM v1.0 @ 2018</small>
                 </p>
               </li>
               <!-- Menu Body -->
-              <li class="user-body">
+              <li class="user-body" style="display:none">
                 <div class="row">
                   <div class="col-xs-4 text-center">
                     <a href="#">Followers</a>
@@ -139,11 +152,11 @@ desired effect
               </li>
               <!-- Menu Footer-->
               <li class="user-footer">
-                <div class="pull-left">
+                <div class="pull-left" style="display:none">
                   <a href="#" class="btn btn-default btn-flat">Profile</a>
                 </div>
                 <div class="pull-right">
-                  <a href="#" class="btn btn-default btn-flat">Sign out</a>
+                  <a href="login.jsp" class="btn btn-default btn-flat">Sign out</a>
                 </div>
               </li>
             </ul>
@@ -173,7 +186,7 @@ desired effect
 	          </ul>
 	        </li>
 	        
-	        <li><a href="listTask.jsp"><i class="fa fa-book"></i> <span>代办任务</span></a></li>
+	        <li><a href="listMyTask.jsp"><i class="fa fa-book"></i> <span>代办任务</span></a></li>
 	        
 	         <li class="treeview">
 	          <a href="#">
@@ -182,7 +195,7 @@ desired effect
 	          </a>
 	          <ul class="treeview-menu">
 	            <li><a href="listMyProcess.jsp"><i class="fa fa-circle-o"></i> 已建流程</a></li>
-	            <li><a href="listMyTask.jsp"><i class="fa fa-circle-o"></i> 已办任务</a></li>
+	            <li><a href="listMyTaskCompleted.jsp"><i class="fa fa-circle-o"></i> 已办任务</a></li>
 	          </ul>
 	        </li>
 	        
@@ -192,8 +205,8 @@ desired effect
 	            <i class="fa fa-angle-left pull-right"></i>
 	          </a>
 	          <ul class="treeview-menu">
-	          <li><a href="listMyHistoryProcess.jsp"><i class="fa fa-circle-o"></i> 已建流程</a></li>
-	            <li><a href="listMyHistoryTask.jsp"><i class="fa fa-circle-o"></i> 已办任务</a></li>
+	          <li><a href="listMyProcessHistory.jsp"><i class="fa fa-circle-o"></i> 已建流程</a></li>
+	            <li><a href="listMyTaskHistory.jsp"><i class="fa fa-circle-o"></i> 已办任务</a></li>
 	          </ul>
 	        </li>
           
@@ -224,7 +237,7 @@ desired effect
             <div class="box-header">
               <h3 class="box-title">流程模板列表</h3>
 
-              <div class="box-tools">
+              <div class="box-tools" style="display:none">
                 <div class="input-group input-group-sm" style="width: 150px;">
                   <input type="text" name=" 	" class="form-control pull-right" placeholder="Search">
 
@@ -235,9 +248,10 @@ desired effect
               </div>
             </div>
             <!-- /.box-header -->
-            <form id="listForm" action="" method="post">
-            	<input type="hidden" id="hiddenModelId"/>
+            <form id="listForm" name="listForm"  method="post">
+            		
             </form>
+            
 	            <div class="box-body table-responsive no-padding">
 	              <table class="table table-hover">
 	                <tr>
@@ -353,18 +367,13 @@ $(document).ready(function() {
 	$("button[id^='create_process']").each(function(i){
 		
 		 $(this).on('click',function (e) {
-		    e.preventDefault();
-		    alert(11);
 		    
 		    var modelIdValue = $(this).attr('modelId');
-		    $("#hiddenModelId").val(modelIdValue);
 		    
-		    var actionName= "";
-		    //var data = {modelId:modelIdValue};
+		    $('#listForm').attr('action', 'listProcessModel.jsp?isSubmit=1&modelId='+modelIdValue);
 		    
-		    $('#listform').attr('action', 'listProcessModel.jsp?isSubmit=1');
-
-		    $('#listform').submit();
+		    $("#listForm").submit();
+		    
 		    
 		});
 	});

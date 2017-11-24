@@ -1,4 +1,4 @@
-package org.runbpm.utils;
+package org.runbpm.workspace;
 
 
 import javax.servlet.ServletException;
