@@ -20,16 +20,16 @@ if(userIdinSession!=null){
 <%@ page import="org.runbpm.entity.*" %>   
 <%@ page import="org.runbpm.bpmn.definition.*" %>   
 <%@ page import="org.runbpm.workspace.*" %>
-<%@ page import="org.runbpm.service.RuntimeService" %>
+<%@ page import="org.runbpm.service.RunBPMService" %>
 
 <%
-RuntimeService runtimeService = Configuration.getContext().getRuntimeService();
+RunBPMService runBPMService = Configuration.getContext().getRunBPMService();
 //-----获取历史任务列表 开始-->
 EnumSet<EntityConstants.TASK_STATE> stateSet = EnumSet.noneOf(EntityConstants.TASK_STATE.class);  
 stateSet.add(EntityConstants.TASK_STATE.COMPLETED);
 stateSet.add(EntityConstants.TASK_STATE.TERMINATED);
 stateSet.add(EntityConstants.TASK_STATE.CANCELED);
-List<TaskInstance> taskList = runtimeService.listTaskInstanceByUserIdAndState(userId, stateSet);
+List<TaskInstance> taskList = runBPMService.listTaskInstanceByUserIdAndState(userId, stateSet);
 //-----获取历史任务列表 结束<-- 
 
 %>

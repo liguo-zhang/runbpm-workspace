@@ -19,30 +19,30 @@ if(userIdinSession!=null){
 <%@ page import="org.runbpm.entity.*" %>   
 <%@ page import="org.runbpm.bpmn.definition.*" %>   
 <%@ page import="org.runbpm.workspace.*" %>
-<%@ page import="org.runbpm.service.RuntimeService" %>
+<%@ page import="org.runbpm.service.RunBPMService" %>
 <%
 
-RuntimeService runtimeService = Configuration.getContext().getRuntimeService();
+RunBPMService runBPMService = Configuration.getContext().getRunBPMService();
 String taskInstanceId = request.getParameter("taskInstanceId")+"";
 String targetActivityDefinitionId = request.getParameter("targetActivityDefinitionId")+"";
 
-TaskInstance taskInstance = runtimeService.loadTaskInstance(Long.parseLong(taskInstanceId));
-ProcessModel processModel =runtimeService.loadProcessModelByModelId(taskInstance.getProcessModelId());
+TaskInstance taskInstance = runBPMService.loadTaskInstance(Long.parseLong(taskInstanceId));
+ProcessModel processModel =runBPMService.loadProcessModelByModelId(taskInstance.getProcessModelId());
 
 String executeTask = request.getParameter("executeTask")+"";
 
 String targetActivityDefinitionName= null;
 if("1".equals(executeTask)){
-	runtimeService.completeUserTask(Long.parseLong(taskInstanceId));
+	runBPMService.completeUserTask(Long.parseLong(taskInstanceId));
 }else if("2".equals(executeTask)){
 	targetActivityDefinitionName = processModel.getProcessDefinition().getActivity(targetActivityDefinitionId).getName();
-	runtimeService.terminateActivityInstance(taskInstance.getActivityInstanceId(),targetActivityDefinitionId);
+	runBPMService.terminateActivityInstance(taskInstance.getActivityInstanceId(),targetActivityDefinitionId);
 }else if("1".equals(executeTask)){
-	runtimeService.completeUserTask(Long.parseLong(taskInstanceId));
+	runBPMService.completeUserTask(Long.parseLong(taskInstanceId));
 }else if("1".equals(executeTask)){
-	runtimeService.completeUserTask(Long.parseLong(taskInstanceId));
+	runBPMService.completeUserTask(Long.parseLong(taskInstanceId));
 }else if("1".equals(executeTask)){
-	runtimeService.completeUserTask(Long.parseLong(taskInstanceId));
+	runBPMService.completeUserTask(Long.parseLong(taskInstanceId));
 }
 
 %>

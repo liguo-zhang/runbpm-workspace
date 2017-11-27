@@ -20,7 +20,7 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.runbpm.context.Configuration;
 import org.runbpm.entity.ProcessModel;
-import org.runbpm.service.RuntimeService;
+import org.runbpm.service.RunBPMService;
 
 /**
  *
@@ -72,8 +72,8 @@ public class Upload {
 		                    }
 		                    
 		                    //导入流程
-		                    RuntimeService runtimeService = Configuration.getContext().getRuntimeService();
-		                    processModel = runtimeService.deployProcessDefinitionFromString(sb.toString());
+		                    RunBPMService runBPMService = Configuration.getContext().getRunBPMService();
+		                    processModel = runBPMService.deployProcessDefinitionFromString(sb.toString());
 		                } else {
 		                    error="没有选择上传文件！";
 		                }

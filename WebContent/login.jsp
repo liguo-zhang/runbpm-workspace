@@ -6,7 +6,7 @@
    
 <%@ page import="org.runbpm.context.*" %>   
 <%@ page import="org.runbpm.entity.*" %>   
-<%@ page import="org.runbpm.service.RuntimeService" %>
+<%@ page import="org.runbpm.service.RunBPMService" %>
 
 
 <!DOCTYPE html>

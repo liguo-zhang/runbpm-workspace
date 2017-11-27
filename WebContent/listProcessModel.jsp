@@ -18,10 +18,10 @@ if(userIdinSession!=null){
    
 <%@ page import="org.runbpm.context.*" %>   
 <%@ page import="org.runbpm.entity.*" %>   
-<%@ page import="org.runbpm.service.RuntimeService" %>
+<%@ page import="org.runbpm.service.RunBPMService" %>
 <%
-RuntimeService runtimeService = Configuration.getContext().getRuntimeService();
-List<ProcessModel> processModelist = runtimeService.loadProcessModels(true);
+RunBPMService runBPMService = Configuration.getContext().getRunBPMService();
+List<ProcessModel> processModelist = runBPMService.loadProcessModels(true);
 
 //判断是否需要提交
 String isSubmit = request.getParameter("isSubmit")+"";
@@ -32,7 +32,7 @@ System.out.println("isSubmit----"+isSubmit);
 if(isSubmit!=null&&isSubmit.trim().equals("1")){
 	String modelId = request.getParameter("modelId")+"";
 	
-	ProcessInstance processInstance = runtimeService.createAndStartProcessInstance(Long.parseLong(modelId), userId);
+	ProcessInstance processInstance = runBPMService.createAndStartProcessInstance(Long.parseLong(modelId), userId);
 	
 	code = "0";
 	result =  "创建并启动成功。流程实例ID为["+processInstance.getId()+"],流程名称为["+processInstance.getName()+"]";

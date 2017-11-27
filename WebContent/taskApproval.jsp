@@ -19,9 +19,9 @@ if(userIdinSession!=null){
 <%@ page import="org.runbpm.context.*" %>   
 <%@ page import="org.runbpm.entity.*" %>   
 <%@ page import="org.runbpm.workspace.*" %>
-<%@ page import="org.runbpm.service.RuntimeService" %>
+<%@ page import="org.runbpm.service.RunBPMService" %>
 <%
-RuntimeService runtimeService = Configuration.getContext().getRuntimeService();
+RunBPMService runBPMService = Configuration.getContext().getRunBPMService();
 
 String isSubmit = request.getParameter("isSubmit")+"";
 
@@ -30,7 +30,7 @@ String taskInstanceId = request.getParameter("taskInstanceId")+"";
 System.out.println("isSubmit----"+isSubmit);
 
 if(isSubmit!=null&&isSubmit.trim().equals("1")){
-	runtimeService.completeUserTask(Long.parseLong(taskInstanceId));
+	runBPMService.completeUserTask(Long.parseLong(taskInstanceId));
 	response.sendRedirect("listMyTask.jsp?isCompleteTask=1");
 	
 }

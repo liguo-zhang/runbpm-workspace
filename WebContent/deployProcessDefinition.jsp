@@ -16,7 +16,7 @@ if(userIdinSession!=null){
    
 <%@ page import="org.runbpm.context.*" %>   
 <%@ page import="org.runbpm.entity.*" %>   
-<%@ page import="org.runbpm.service.RuntimeService" %>
+<%@ page import="org.runbpm.service.RunBPMService" %>
 <%@ page import="org.runbpm.workspace.Upload" %>
 <%@ page import="org.runbpm.workspace.ResultBean" %>
 
@@ -166,8 +166,8 @@ desired effect
     <section class="sidebar">
     
     <%
-	    RuntimeService runtimeService = Configuration.getContext().getRuntimeService();
-	    List list = runtimeService.loadProcessModels(true);
+	    RunBPMService runBPMService = Configuration.getContext().getRunBPMService();
+	    List list = runBPMService.loadProcessModels(true);
 	    //System.out.println(list.size());
     %>
 

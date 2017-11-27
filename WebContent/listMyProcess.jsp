@@ -19,10 +19,10 @@ if(userIdinSession!=null){
 <%@ page import="org.runbpm.context.*" %>   
 <%@ page import="org.runbpm.entity.*" %>   
 <%@ page import="org.runbpm.workspace.*" %>
-<%@ page import="org.runbpm.service.RuntimeService" %>
+<%@ page import="org.runbpm.service.RunBPMService" %>
 <%
-RuntimeService runtimeService = Configuration.getContext().getRuntimeService();
-List<ProcessInstance> processList =  runtimeService.listProcessInstanceByCreator(userId);
+RunBPMService runBPMService = Configuration.getContext().getRunBPMService();
+List<ProcessInstance> processList =  runBPMService.listProcessInstanceByCreator(userId);
 
 %>
 

@@ -7,10 +7,10 @@
 <%@ page import="org.runbpm.entity.*" %>   
 <%@ page import="org.runbpm.bpmn.definition.*" %>   
 <%@ page import="org.runbpm.workspace.*" %>
-<%@ page import="org.runbpm.service.RuntimeService" %>
+<%@ page import="org.runbpm.service.RunBPMService" %>
 
 <%
-RuntimeService runtimeService = Configuration.getContext().getRuntimeService();
+RunBPMService runBPMService = Configuration.getContext().getRunBPMService();
 
 //是否从登陆界面过来的，如果是的话，需要记录session begin-->
 Object userIdFromRequest = request.getParameter("userId");
@@ -34,7 +34,7 @@ if(userIdinSession!=null){
 EnumSet<EntityConstants.TASK_STATE> stateSet = EnumSet.noneOf(EntityConstants.TASK_STATE.class);  
 stateSet.add(EntityConstants.TASK_STATE.NOT_STARTED);  
 stateSet.add(EntityConstants.TASK_STATE.RUNNING);
-List<TaskInstance> taskList = runtimeService.listTaskInstanceByUserIdAndState(userId, stateSet);
+List<TaskInstance> taskList = runBPMService.listTaskInstanceByUserIdAndState(userId, stateSet);
 //-----获取代办任务列表 结束<-- 
 
 //----以下是 判断接受任务、接受任务、转到任务处理界面的逻辑
@@ -43,7 +43,7 @@ String isSubmit = request.getParameter("isSubmit")+"";
 boolean showClaimTask = false;
 boolean sendRedirect=false;//是否转到任务界面
 if(isSubmit!=null&&isSubmit.trim().equals("1")){
-	TaskInstance taskInstance = runtimeService.loadTaskInstance(Long.parseLong(taskInstanceId));
+	TaskInstance taskInstance = runBPMService.loadTaskInstance(Long.parseLong(taskInstanceId));
 	if(taskInstance.getState().equals(EntityConstants.TASK_STATE.NOT_STARTED)){
 		//需要显示接受任务界面
 		showClaimTask = true;
@@ -55,14 +55,14 @@ if(isSubmit!=null&&isSubmit.trim().equals("1")){
 String isClaim = request.getParameter("isClaim")+"";
 if(isClaim!=null&&isClaim.trim().equals("1")){
 	//处理任务（抢任务），将该任务置于我的名下，任务状态从“未开始”转化为“运行中”
-	runtimeService.claimUserTask(Long.parseLong(taskInstanceId));
+	runBPMService.claimUserTask(Long.parseLong(taskInstanceId));
 	sendRedirect=true;
 }
 
 //转发到任务处理界面 开始-->
 if(sendRedirect){
-	TaskInstance taskInstance = runtimeService.loadTaskInstance(Long.parseLong(taskInstanceId));
-	ProcessModel processModel =runtimeService.loadProcessModelByModelId(taskInstance.getProcessModelId());
+	TaskInstance taskInstance = runBPMService.loadTaskInstance(Long.parseLong(taskInstanceId));
+	ProcessModel processModel =runBPMService.loadProcessModelByModelId(taskInstance.getProcessModelId());
 	ActivityDefinition activityDefinition = processModel.getProcessDefinition().getActivity(taskInstance.getActivityDefinitionId());
 	ExtensionElements extensionElements = activityDefinition.getExtensionElements();
 	Map templateMap = extensionElements.getExtensionPropsMap("runBPM_ApplicationTemplate_Definition");

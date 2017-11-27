@@ -18,11 +18,11 @@ if(userIdinSession!=null){
 <%@ page import="org.runbpm.context.*" %>   
 <%@ page import="org.runbpm.entity.*" %>   
 <%@ page import="org.runbpm.workspace.*" %>
-<%@ page import="org.runbpm.service.RuntimeService" %>
+<%@ page import="org.runbpm.service.RunBPMService" %>
 <%
-RuntimeService runtimeService = Configuration.getContext().getRuntimeService();
+RunBPMService runBPMService = Configuration.getContext().getRunBPMService();
 String processInstId = request.getParameter("processInstanceId");
-List<ActivityInstance> activityList =  runtimeService.listActivityInstanceByProcessInstId(Long.parseLong(processInstId));
+List<ActivityInstance> activityList =  runBPMService.listActivityInstanceByProcessInstId(Long.parseLong(processInstId));
 
 %>
 
