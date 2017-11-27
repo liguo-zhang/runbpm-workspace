@@ -27,8 +27,6 @@ String isSubmit = request.getParameter("isSubmit")+"";
 
 String taskInstanceId = request.getParameter("taskInstanceId")+"";
 
-System.out.println("isSubmit----"+isSubmit);
-
 if(isSubmit!=null&&isSubmit.trim().equals("1")){
 	runBPMService.completeUserTask(Long.parseLong(taskInstanceId));
 	response.sendRedirect("listMyTask.jsp?isCompleteTask=1");

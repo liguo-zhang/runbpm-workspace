@@ -510,7 +510,6 @@ desired effect
                       	<form>
                       	<%
 	                      	Set<ActivityDefinition> backSet = processDefinition.listBackableActivitySet(activityDefinition);
-                      	    System.out.println(backSet);
 	                      	Iterator<ActivityDefinition> backIt = backSet.iterator();
 	                      	while(backIt.hasNext()){
 	                      		ActivityDefinition at = backIt.next();

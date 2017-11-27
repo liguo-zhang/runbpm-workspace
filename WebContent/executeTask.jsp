@@ -55,7 +55,6 @@ if("taskComplete".equals(executeTask)){
 }else if("taskSetAssignee".equals(executeTask)){
 	runBPMService.setAssignee(Long.parseLong(taskInstanceId),assigneeUserId);
 }else if("taskTerminateForBackWithSelection".equals(executeTask)){
-	System.out.println("targetActivityDefinitionId----"+targetActivityDefinitionId);
 	targetActivityDefinitionName = processModel.getProcessDefinition().getActivity(targetActivityDefinitionId).getName();
 	runBPMService.terminateActivityInstance(activityInstance.getId(), targetActivityDefinitionId);
 }

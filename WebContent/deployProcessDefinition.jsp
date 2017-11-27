@@ -168,7 +168,6 @@ desired effect
     <%
 	    RunBPMService runBPMService = Configuration.getContext().getRunBPMService();
 	    List list = runBPMService.loadProcessModels(true);
-	    //System.out.println(list.size());
     %>
 
       <!-- Sidebar Menu -->

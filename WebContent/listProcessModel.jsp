@@ -27,7 +27,7 @@ List<ProcessModel> processModelist = runBPMService.loadProcessModels(true);
 String isSubmit = request.getParameter("isSubmit")+"";
 String code = null;
 String result = null;
-System.out.println("isSubmit----"+isSubmit);
+
 
 if(isSubmit!=null&&isSubmit.trim().equals("1")){
 	String modelId = request.getParameter("modelId")+"";
@@ -36,7 +36,7 @@ if(isSubmit!=null&&isSubmit.trim().equals("1")){
 	
 	code = "0";
 	result =  "创建并启动成功。流程实例ID为["+processInstance.getId()+"],流程名称为["+processInstance.getName()+"]";
-	System.out.println(result);
+	
 }
 
 %>
