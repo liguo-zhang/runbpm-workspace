@@ -15,7 +15,6 @@ RunBPMService runBPMService = Configuration.getContext().getRunBPMService();
 //是否从登陆界面过来的，如果是的话，需要记录session begin-->
 Object userIdFromRequest = request.getParameter("userId");
 if(userIdFromRequest!=null&&userIdFromRequest.toString().length()>0){
-	System.out.println(userIdFromRequest);
 	session.setAttribute("userId", userIdFromRequest);
 	
 }
@@ -71,23 +70,11 @@ if(sendRedirect){
 	String url = null;
 	if(templateMap!=null){
 		if("appliation_operation".equals(templateMap.get("type").toString())){
-			String applicationMapString = templateMap.get("applicationMap").toString();
-			 StringTokenizer st = new StringTokenizer(applicationMapString,",");
-			 int i =0;
-		     while (st.hasMoreTokens()) {
-		    	 	st.nextToken();
-		         i++;
-		     } 
-		     if(i==1){
-		    	 	url="listApplicationTemplate1.jsp"+"?taskInstanceId="+taskInstanceId; 
-		     }else if(i==2){
-		    	 	url="listApplicationTemplate2.jsp"+"?taskInstanceId="+taskInstanceId; 
-		     }
+		    	 url="listApplicationTemplate.jsp"+"?taskInstanceId="+taskInstanceId;
 		}
 	}else{
 		 url = extensionElements.getPropertyValue("application")+"?taskInstanceId="+taskInstanceId;
 	}
-	
 	
 	response.sendRedirect(url);
 }

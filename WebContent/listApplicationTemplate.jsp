@@ -35,23 +35,29 @@ ActivityDefinition activityDefinition = processDefinition.getActivity(activityDe
 ExtensionElements extensionElements = activityDefinition.getExtensionElements();
 Map templateMap = extensionElements.getExtensionPropsMap("runBPM_ApplicationTemplate_Definition");
 
-Map applicationMap = null;
-Map operationMap = null;
-//只有一组application，和一组operation
+
+List operationList = null;
+List applicationListList = new ArrayList();
+
 if(templateMap!=null){
+	
+	
 	if("appliation_operation".equals(templateMap.get("type").toString())){
-		String applicationMapString = templateMap.get("applicationMap").toString();
-		StringTokenizer st = new StringTokenizer(applicationMapString,",");
-	     if (st.hasMoreTokens()) {
+		
+		String applicationListString = templateMap.get("applicationList").toString();
+		
+		
+		StringTokenizer st = new StringTokenizer(applicationListString,",");
+	     while (st.hasMoreTokens()) {
 	    	 	String applicationMapName = st.nextToken();
-	    	    applicationMap = extensionElements.getExtensionPropsMap(applicationMapName);
+	    	 	
+	    	 	List applicationlist = extensionElements.getExtensionPropsList(applicationMapName);
+	    	 	applicationListList.add(applicationlist);
 	     }
 	     
-	     String operationMapString = templateMap.get("operationMap").toString();
-	     System.out.println(operationMapString);
+	     String operationListString = templateMap.get("operationList").toString();
 	     
-	     operationMap  = extensionElements.getExtensionPropsMap(operationMapString);
-	     System.out.println(operationMap);
+	     operationList  = extensionElements.getExtensionPropsList(operationListString);
 	}
 }
 
@@ -240,7 +246,7 @@ desired effect
     <section class="content-header">
       <h1>
         任务处理详情
-        <small>该任务有一组应用和一组操作</small>
+        <small>该任务有两组应用和一组操作</small>
       </h1>
       <ol class="breadcrumb">
         <li><a href="listMyTask.jsp"><i class="fa fa-dashboard"></i> 代办任务</a></li>
@@ -265,39 +271,47 @@ desired effect
               </div>
             </div>
             <!-- /.box-header -->
-            <div class="box-body table-responsive no-padding">
-		              <table class="table table-hover">
-		                <tr>
-		                  <th>应用名称</th>
-		                  <th>应用地址</th>
-		                </tr>
-		                <%
-		                Iterator keyIt = applicationMap.keySet().iterator();
-		                while(keyIt.hasNext()){
-		                		String appKey = keyIt.next().toString();
-		                		String appValue = applicationMap.get(appKey).toString();
-		                %>
-		                <tr>
-		                  <td><%=appKey %></td>
-		                  <td><a href="<%=appValue %>?source=listApplicationTemplate1.jsp&taskInstanceId=<%=taskInstanceId%>"><%=appValue %></a></td>
-		                  
-		                </tr>
-		                <%
-		                }
-		                %>
-		              </table>
-            </div>
+            <%
+            for(int i = 0;i<applicationListList.size();i++){
+            		List applicationList = (List)applicationListList.get(i);
+            %>
+	            <div class="box-body table-responsive no-padding">
+			              <table class="table table-hover">
+			                <tr>
+			                  <th>应用名称</th>
+			                  <th>应用地址</th>
+			                </tr>
+			                <%
+			                Iterator keyIt = applicationList.iterator();
+			                while(keyIt.hasNext()){
+			                		String id = keyIt.next().toString();
+			                		String applicationURL = PropertyTool.getPropertyMap().get("application."+id+".url").toString();
+			                		String applicationName = PropertyTool.getPropertyMap().get("application."+id+".name").toString();
+			                %>
+			                <tr>
+			                  <td><%=applicationName %></td>
+			                  <td><a href="<%=applicationURL %>?taskInstanceId=<%=taskInstanceId%>"><%=applicationURL %></a></td>
+			                  
+			                </tr>
+			                <%
+			                }
+			                %>
+			              </table>
+	            </div>
+	        <%}%>
             <!-- /.box-body -->
             <div class="box-footer">
            		<div style="float:right;">
            		
             				<%
-		                Iterator keyMapIt = operationMap.keySet().iterator();
+		                Iterator keyMapIt = operationList.iterator();
 		                while(keyMapIt.hasNext()){
-		                		String appKey = keyMapIt.next().toString();
-		                		String appValue = operationMap.get(appKey).toString();
+		                		String id = keyMapIt.next().toString();
+		                		String operationURL = PropertyTool.getPropertyMap().get("operation."+id+".url").toString();
+		                		String operationName = PropertyTool.getPropertyMap().get("operation."+id+".name").toString();
+		                		
 		                %>
-                				<button type="button" id="<%=appValue%>" class="btn btn-info"><%=appKey%></button>
+                				<button type="button" id="<%=operationURL%>" class="btn btn-info"><%=operationName%></button>
                 			<%
 		                }
                 			%>
@@ -363,6 +377,46 @@ desired effect
                 </div>
               </div>
               
+              
+              <div class="modal fade" id="taskPutBackModal" tabindex="-1" role="dialog" aria-labelledby="deployResultModal">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                      <h4 class="modal-title" id="deployResultModal">放回任务</h4>
+                     
+                    </div>
+                    <div class="modal-body">
+                      是否放回任务？工作流引擎将重新分配任务。
+                    </div>
+                    <div class="modal-footer">
+                    	  <button type="button" id="taskPutBackSubmit" class="btn btn-primary">确认</button>
+                      <button type="button" class="btn btn-default"  data-dismiss="modal">取消</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              
+              <div class="modal fade" id="taskTerminateForBackModal" tabindex="-1" role="dialog" aria-labelledby="deployResultModal">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                      <h4 class="modal-title" id="deployResultModal">退回任务</h4>
+                     
+                    </div>
+                    <div class="modal-body">
+                      是否退回到上一步？
+                    </div>
+                    <div class="modal-footer">
+                    	  <button type="button" id="taskTerminateForBackSubmit" class="btn btn-primary">确认</button>
+                      <button type="button" class="btn btn-default"  data-dismiss="modal">取消</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
               <div class="modal fade" id="taskTerminateForJumpModal" tabindex="-1" role="dialog" aria-labelledby="deployResultModal">
                 <div class="modal-dialog" role="document">
                   <div class="modal-content">
@@ -405,33 +459,155 @@ desired effect
                   </div>
                 </div>
               </div>
+              
+              <div class="modal fade" id="taskSetAssigneeModal" tabindex="-1" role="dialog" aria-labelledby="deployResultModal">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                      <h4 class="modal-title" id="deployResultModal">跳转任务</h4>
+                    </div>
+                    <div class="modal-body">
+                      	选择要重新分配的执行人：
+      						<div class="form-group has-feedback">
+      							<select class="form-control" name="assigneeUserId" id="assigneeUserId">
+      							
+                      			<form>
+                  					<option value="user1">user1</option>
+                  					<option value="user2">user2</option>
+                  					<option value="user3">user3</option>
+                  					<option value="user4">user4</option>
+                  					<option value="user5">user5</option>
+                  					<option value="user6">user6</option>
+                  					<option value="user7">user7</option>
+                  					<option value="user8">user8</option>
+                  					<option value="user9">user9</option>
+                  				</select>
+                  			</div>
+                  		</form>		
+                    </div>
+                    <div class="modal-footer">
+                       <button type="button" id="taskSetAssigneeSubmit" class="btn btn-primary">确认</button>
+                      <button type="button" class="btn btn-primary"  data-dismiss="modal">关闭</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              
+              <div class="modal fade" id="taskTerminateForBackWithSelectionModal" tabindex="-1" role="dialog" aria-labelledby="deployResultModal">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                      <h4 class="modal-title" id="deployResultModal">退回任务</h4>
+                    </div>
+                    <div class="modal-body">
+                      	选择要退回的节点：
+      						<div class="form-group has-feedback">
+      							<select class="form-control" name="targetActivityDefinitionIdForBack" id="targetActivityDefinitionIdForBack">
+      							
+                      	<form>
+                      	<%
+	                      	Set<ActivityDefinition> backSet = processDefinition.listBackableActivitySet(activityDefinition);
+                      	    System.out.println(backSet);
+	                      	Iterator<ActivityDefinition> backIt = backSet.iterator();
+	                      	while(backIt.hasNext()){
+	                      		ActivityDefinition at = backIt.next();
+	                      		//如果是人工活动，而且不是自己
+	                      		if(at instanceof UserTask && at.getId()!=activityDefinitionId){
+	                      			//曾经运行过
+	                      			if(runBPMService.listActivityInstanceByActivityDefId(processInstId, at.getId()).size()>0){
+	                      				definitionId = at.getId();
+	                      				definitionName = at.getName();
+                      	%>
+                  						<option value="<%=definitionId%>"><%=definitionName%></option>
+                  		<%
+	                      			}
+	                      			
+	                      		}
+	                      	}
+                  		%>			
+                  					
+                  				</select>
+                  			</div>
+                  		</form>		
+                    </div>
+                    <div class="modal-footer">
+                       <button type="button" id="taskTerminateForBackWithSelectionSubmit" class="btn btn-primary">确认</button>
+                      <button type="button" class="btn btn-primary"  data-dismiss="modal">关闭</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
               <!--//Modal-->
 
 <script>
 
 $(document).ready(function() {
-	
+	//----提交（完成）任务
 	 $("#taskComplete").on('click',function (e) {
 		 $('#taskCompleteModal').modal({keyboard: true});
 	});
 	 $("#taskCompleteSubmit").on('click',function (e) {
-	    var action = 'executeTask.jsp?executeTask=1&taskInstanceId='+<%=taskInstanceId%>;
+	    var action = 'executeTask.jsp?executeTask=taskComplete&taskInstanceId='+<%=taskInstanceId%>;
 	    $('#submit_form').attr('action', action);
 	    $("#submit_form").submit(); 
 	});
 	 
+	//----跳转任务
 	 $("#taskTerminateForJump").on('click',function (e) {
 		 $('#taskTerminateForJumpModal').modal({keyboard: true});
 	});
 	 $("#taskTerminateForJumpSubmit").on('click',function (e) {
 		 var targetActivityDefinitionId = $('#targetActivityDefinitionId').val();
-		 
-		 var action = 'executeTask.jsp?executeTask=2&taskInstanceId='+<%=taskInstanceId%>+'&targetActivityDefinitionId='+targetActivityDefinitionId;
+		 var action = 'executeTask.jsp?executeTask=taskTerminateForJump&taskInstanceId='+<%=taskInstanceId%>+'&targetActivityDefinitionId='+targetActivityDefinitionId;
 		 $('#submit_form').attr('action', action);
 		 $("#submit_form").submit();  
 	 });
 	 
+	//----退回任务（到上一步），假设当前活动实例只有一个输入连接弧，且输入连接弧的头节点是人工活动。
+	 $("#taskTerminateForBack").on('click',function (e) {
+		 $('#taskTerminateForBackModal').modal({keyboard: true});
+	 });
+	 $("#taskTerminateForBackSubmit").on('click',function (e) {
+		 var action = 'executeTask.jsp?executeTask=taskTerminateForBack&taskInstanceId='+<%=taskInstanceId%>;
+		 $('#submit_form').attr('action', action);
+		 $("#submit_form").submit();  
+	 });
 	 
+	//----放回任务
+	 $("#taskPutBack").on('click',function (e) {
+		 $('#taskPutBackModal').modal({keyboard: true});
+	 });
+	 $("#taskPutBackSubmit").on('click',function (e) {
+		 var action = 'executeTask.jsp?executeTask=taskPutBack&taskInstanceId='+<%=taskInstanceId%>;
+		 $('#submit_form').attr('action', action);
+		 $("#submit_form").submit(); 
+	 });
+	 
+	//----退回任务到指定的一步
+	 $("#taskTerminateForBackWithSelection").on('click',function (e) {
+		 $('#taskTerminateForBackWithSelectionModal').modal({keyboard: true});
+	 });
+	 $("#taskTerminateForBackWithSelectionSubmit").on('click',function (e) {
+		 var targetActivityDefinitionId = $('#targetActivityDefinitionIdForBack').val();
+		 
+		 var action = 'executeTask.jsp?executeTask=taskTerminateForBackWithSelection&taskInstanceId='+<%=taskInstanceId%>+'&targetActivityDefinitionId='+targetActivityDefinitionId;
+		 $('#submit_form').attr('action', action);
+		 $("#submit_form").submit();  
+	 });
+	 
+	//----重新分配执行人
+	 $("#taskSetAssignee").on('click',function (e) {
+		 $('#taskSetAssigneeModal').modal({keyboard: true});
+	 });
+	 $("#taskSetAssigneeSubmit").on('click',function (e) {
+		 var assigneeUserId = $('#assigneeUserId').val();
+		 var action = 'executeTask.jsp?executeTask=taskSetAssignee&taskInstanceId='+<%=taskInstanceId%>+'&assigneeUserId='+assigneeUserId;
+		 $('#submit_form').attr('action', action);
+		 $("#submit_form").submit();  
+	 });
 	 
 });
 

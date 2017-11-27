@@ -22,6 +22,11 @@ if(userIdinSession!=null){
 <%@ page import="org.runbpm.service.RunBPMService" %>
 <%
 RunBPMService runBPMService = Configuration.getContext().getRunBPMService();
+String isTerminated = request.getParameter("isTerminated")+"";
+String processInstanceId = request.getParameter("processInstanceId");
+if(isTerminated!=null&&isTerminated.trim().equals("1")){
+	runBPMService.terminateProcessInstance(Long.parseLong(processInstanceId));
+}
 List<ProcessInstance> processList =  runBPMService.listProcessInstanceByCreator(userId);
 
 %>
@@ -58,6 +63,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <script src="ui/https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
   <script src="ui/https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
   <![endif]-->
+  
 </head>
 <!--
 BODY TAG OPTIONS:
@@ -242,6 +248,7 @@ desired effect
                   <th>状态</th>
                   <th>创建时间</th>
                   <th>最近更新时间</th>
+                  <th>动作</th>
                 </tr>
                 <%
                 for(ProcessInstance processInstance : processList){
@@ -254,6 +261,12 @@ desired effect
                   <td><%=ConstantsUtil.getStateString(processInstance.getState()) %></td>
                   <td><%=processInstance.getCreateDate() %></td>
                   <td><%=processInstance.getModifyDate()%></td>
+                  <td>
+                       <div class="form-group">
+		                  <button type="button" processInstanceId="<%=processInstance.getId() %>" class="btn btn-info pull-right" id="terminateProcess">终止</button>
+		                </div>
+		                <form id="submit_form" method="post"></form>
+                  </td>
                 </tr>
                 <%
                 }
@@ -304,21 +317,19 @@ desired effect
 <script>
 
 $(document).ready(function() {
-  $('#create_process').on('click',function (e) {
+  $('#terminateProcess').on('click',function (e) {
     e.preventDefault();
-    
-    var modelid = $(this).attr('modelid');
+    var processInstanceId = $(this).attr('processInstanceId');
+    var action = 'listMyProcess.jsp?isTerminated=1&processInstanceId='+processInstanceId;
+    $('#submit_form').attr('action', action);
+    $("#submit_form").submit();
     
   });
   
 });
 
 function PostAjaxContent(formName,actionName){
-  var data=$(formName).serialize();
-    $.post(actionName, data, function (result) { 
-      $('#ajax-content').html(result);
-    $('.preloader').hide();
-    }, "text");
+  
 }
 
 

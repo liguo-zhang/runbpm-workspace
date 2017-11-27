@@ -25,7 +25,7 @@ RunBPMService runBPMService = Configuration.getContext().getRunBPMService();
 
 
 String taskInstanceId = request.getParameter("taskInstanceId")+"";
-String source= request.getParameter("source")+"";
+
 
 %>
 
@@ -302,7 +302,7 @@ $(document).ready(function() {
 	 $("#submit_taskApplication").on('click',function (e) {
 		    
 		    
-		    var action = "<%=source%>?taskInstanceId=<%=taskInstanceId%>";
+		    var action = "listApplicationTemplate.jsp?taskInstanceId=<%=taskInstanceId%>";
 		    
 		    $('#submit_form').attr('action', action);
 		    

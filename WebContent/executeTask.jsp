@@ -25,24 +25,39 @@ if(userIdinSession!=null){
 RunBPMService runBPMService = Configuration.getContext().getRunBPMService();
 String taskInstanceId = request.getParameter("taskInstanceId")+"";
 String targetActivityDefinitionId = request.getParameter("targetActivityDefinitionId")+"";
+String assigneeUserId = request.getParameter("assigneeUserId")+"";
 
 TaskInstance taskInstance = runBPMService.loadTaskInstance(Long.parseLong(taskInstanceId));
-ProcessModel processModel =runBPMService.loadProcessModelByModelId(taskInstance.getProcessModelId());
+ActivityInstance activityInstance = runBPMService.loadActivityInstance(taskInstance.getActivityInstanceId());
 
-String executeTask = request.getParameter("executeTask")+"";
+
+ProcessModel processModel =runBPMService.loadProcessModelByModelId(taskInstance.getProcessModelId());
+ProcessDefinition processDefinition = processModel.getProcessDefinition();
+ActivityDefinition activityDefinition = processDefinition.getActivity(activityInstance.getActivityDefinitionId());
 
 String targetActivityDefinitionName= null;
-if("1".equals(executeTask)){
+String executeTask = request.getParameter("executeTask")+"";
+
+if("taskComplete".equals(executeTask)){
 	runBPMService.completeUserTask(Long.parseLong(taskInstanceId));
-}else if("2".equals(executeTask)){
+}else if("taskTerminateForJump".equals(executeTask)){
 	targetActivityDefinitionName = processModel.getProcessDefinition().getActivity(targetActivityDefinitionId).getName();
 	runBPMService.terminateActivityInstance(taskInstance.getActivityInstanceId(),targetActivityDefinitionId);
-}else if("1".equals(executeTask)){
-	runBPMService.completeUserTask(Long.parseLong(taskInstanceId));
-}else if("1".equals(executeTask)){
-	runBPMService.completeUserTask(Long.parseLong(taskInstanceId));
-}else if("1".equals(executeTask)){
-	runBPMService.completeUserTask(Long.parseLong(taskInstanceId));
+}else if("taskTerminateForBack".equals(executeTask)){
+	//该操作假设当前活动实例只有一个输入连接弧，且输入连接弧的头节点是人工活动。
+	List<SequenceFlow> sequenceFlowList = activityDefinition.getIncomingSequenceFlowList();
+	SequenceFlow sequenceFlow= sequenceFlowList.get(0);
+	targetActivityDefinitionId = sequenceFlow.getSourceRef();
+	targetActivityDefinitionName = processModel.getProcessDefinition().getActivity(targetActivityDefinitionId).getName();
+	runBPMService.terminateActivityInstance(activityInstance.getId(), targetActivityDefinitionId);
+}else if("taskPutBack".equals(executeTask)){
+	runBPMService.putbackUserTask(Long.parseLong(taskInstanceId));
+}else if("taskSetAssignee".equals(executeTask)){
+	runBPMService.setAssignee(Long.parseLong(taskInstanceId),assigneeUserId);
+}else if("taskTerminateForBackWithSelection".equals(executeTask)){
+	System.out.println("targetActivityDefinitionId----"+targetActivityDefinitionId);
+	targetActivityDefinitionName = processModel.getProcessDefinition().getActivity(targetActivityDefinitionId).getName();
+	runBPMService.terminateActivityInstance(activityInstance.getId(), targetActivityDefinitionId);
 }
 
 %>
@@ -253,7 +268,7 @@ desired effect
             <!-- /.box-header -->
             <div class="box-body table-responsive no-padding">
             		<%
-            			if("1".equals(executeTask)){
+            			if("taskComplete".equals(executeTask)){
             	 	%>
 				              <div class="alert alert-info alert-dismissible">
 				                <h4><i class="icon fa fa-info"></i> 提示</h4>
@@ -263,7 +278,7 @@ desired effect
 				              setTimeout("location.href='listMyTask.jsp'",5000); 
 				              </script>
 		        	<%
-            			}else if("2".equals(executeTask)){
+            			}else if("taskTerminateForJump".equals(executeTask)){
             				
             		%>
             					<div class="alert alert-info alert-dismissible">
@@ -274,8 +289,50 @@ desired effect
 				              setTimeout("location.href='listMyTask.jsp'",5000); 
 				              </script>
             		<%		
-            			}
-		        	%>      
+            			}else if("taskTerminateForBack".equals(executeTask)){
+            		%>
+            					<div class="alert alert-info alert-dismissible">
+				                <h4><i class="icon fa fa-info"></i> 提示</h4>
+				                <a href="listMyTask.jsp">退回任务成功，上一步活动定义ID[<%=targetActivityDefinitionId%>]，目标活动定义名称[<%=targetActivityDefinitionName%>],5秒后切换到代办任务页面。</a>
+				              </div>
+				              <script>
+				              setTimeout("location.href='listMyTask.jsp'",5000); 
+				              </script>
+            		<%		
+            			}else if("taskSetAssignee".equals(executeTask)){
+            		%>
+            					<div class="alert alert-info alert-dismissible">
+				                <h4><i class="icon fa fa-info"></i> 提示</h4>
+				                <a href="listMyTask.jsp">重新指定任务执行人成功，新的执行人ID[<%=assigneeUserId%>],5秒后切换到代办任务页面。</a>
+				              </div>
+				              <script>
+				              setTimeout("location.href='listMyTask.jsp'",5000); 
+				              </script>
+            		<%		
+            			}else if("taskTerminateForBackWithSelection".equals(executeTask)){
+            		%>
+            					<div class="alert alert-info alert-dismissible">
+				                <h4><i class="icon fa fa-info"></i> 提示</h4>
+				                <a href="listMyTask.jsp">退回任务成功，退回的活动定义ID[<%=targetActivityDefinitionId%>]，活动定义名称[<%=targetActivityDefinitionName%>],5秒后切换到代办任务页面。</a>
+				              </div>
+				              <script>
+				              setTimeout("location.href='listMyTask.jsp'",5000); 
+				              </script>
+            		<%
+            			}else if("taskPutBack".equals(executeTask)){
+                    		%>
+                    					<div class="alert alert-info alert-dismissible">
+        				                <h4><i class="icon fa fa-info"></i> 提示</h4>
+        				                <a href="listMyTask.jsp">放回任务成功,5秒后切换到代办任务页面。</a>
+        				              </div>
+        				              <script>
+        				              setTimeout("location.href='listMyTask.jsp'",5000); 
+        				              </script>
+                    		<%
+                    			}
+        		        	%>         
+		        	
+		        	
 		              
             </div>
             <!-- /.box-body -->
