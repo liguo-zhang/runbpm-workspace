@@ -218,16 +218,50 @@ desired effect
 
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
-  		<div class="content with-diagram nopadding" id="js-drop-zone" >
-				 <div class="row">
-				 		<div class="col-xs-7 col-sm-6 col-lg-8 nopadding">
-				    			<div class="canvas" id="js-canvas"></div>
-				    		</div>
-				      	<div class="col-xs-5 col-sm-6 col-lg-4 nopadding">
-				    			<div id="js-properties-panel"></div>
-				    		</div>
-				   </div>
-          </div>
+  		<section class="content-header" id="content_header_id">
+  			<ul class="buttons">
+			    <li>
+			      下载
+			    </li>
+			    <li>
+			      <a id="js-download-diagram" href title="download BPMN diagram">
+			        BPMN流程定义文件
+			      </a>
+			    </li>
+			    <li>
+			      <a id="js-download-svg" href title="download as SVG image">
+			        SVG图片
+			      </a>
+			    </li>
+			  </ul>
+  		</section>
+  		
+  		
+  		
+  		
+  		<section class="content">
+		  		<ul class="nav nav-tabs">
+		  			<li class="active"><a data-toggle="tab" href="#draw_tab">画板</a></li>
+		  			<li><a data-toggle="tab" href="#bpmn_tab">BPMN流程定义文件</a></li>
+				</ul>
+  				<div class="tab-content">
+  					<div id="draw_tab" class="tab-pane fade in active">
+				  		<div class="content with-diagram nopadding" id="js-drop-zone" >
+								 <div class="row">
+								 		<div class="col-xs-7 col-sm-6 col-lg-8 nopadding">
+								    			<div class="canvas" id="js-canvas"></div>
+								    		</div>
+								      	<div class="col-xs-5 col-sm-6 col-lg-4 nopadding">
+								    			<div id="js-properties-panel"></div>
+								    		</div>
+								   </div>
+				          </div>
+				     </div>
+				      <div id="bpmn_tab" class="tab-pane fade">
+						    
+					  </div>
+				  </div>   
+          </section>
   </div>
   <!-- /.content-wrapper -->
 
@@ -263,7 +297,8 @@ desired effect
 <script src="modeler/index.js"></script>
 <script>
 $(function () {
-	$("svg").height($(".content-wrapper").height());
+	
+	$("svg").height($(".content-wrapper").height()-$("#content_header_id").height()-20);
 	
 });
 </script>

@@ -77,7 +77,6 @@ a:link {
 }
 /* line 84, styles/app.less */
 .buttons {
-  position: fixed;
   bottom: 20px;
   left: 20px;
   padding: 0;
