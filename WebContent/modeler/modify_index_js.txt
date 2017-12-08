@@ -1,0 +1,62 @@
+
+1.bjs-container
+注释
+position: options.position
+
+--------------------------------------------------------------------------------------------------------------------------------
+2.app.less
+
+.djs-palette {
+     height: 450px;
+    width: 50px;
+}
+.djs-container {
+     background: white;
+}
+content去掉
+position: relative; 但是在下面的元素追加这个属性
+
+去掉
+canvas
+.content .canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+去掉
+#js-properties-panel {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 260px;
+  z-index: 10;
+  border-left: 1px solid #ccc;
+  overflow: auto;
+  &:empty {
+    display: none;
+  }
+  > .djs-properties-panel {
+    padding-bottom: 70px;
+    min-height:100%;
+  }
+}
+----------------------------------------------------------------
+3.菜单 依次注释不需要的按钮 ，调整顺序
+bpmn-js PaletteProvider.js
+//    'create.intermediate-event': createAction(
+//      'bpmn:IntermediateThrowEvent', 'event', 'bpmn-icon-intermediate-event-none'
+//    ),
+----------------------------------------------------------------
+4.
+runbpm-js-properties-panel
+lib/properiesPanel.css
+djs-properties-header class="label"
+----------------------------------------------------------------
+5.注释不要的task
+bpmn-js ReplaceOption.js
+module.exports.TASK
+----------------------------------------------------------------
