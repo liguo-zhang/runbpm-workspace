@@ -1,2 +1,3 @@
-WebContent/WEB-INF/lib/classes
 .DS_Store
+*.class
+WebContent/WEB-INF/classes/applicationTemplate.properties
