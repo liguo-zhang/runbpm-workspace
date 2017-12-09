@@ -5,7 +5,14 @@ String userId = null;
 if(userIdinSession!=null){
 	userId = userIdinSession.toString();
 }else{
-	response.sendRedirect("login.jsp");
+	if(session.getAttribute("party")== null){
+		if(null != request.getQueryString()){
+			session.setAttribute("redirectUrl", request.getRequestURL().append("?").append(request.getQueryString()).toString());
+		}else{
+			session.setAttribute("redirectUrl", request.getRequestURL().toString());
+		}
+		response.sendRedirect("login.jsp");
+	}
 }
 //判断session，记录userId. end-->
 %>
@@ -181,32 +188,33 @@ desired effect
 	            <i class="fa fa-angle-left pull-right"></i>
 	          </a>
 	          <ul class="treeview-menu">
+	          	<li><a href="modeler.jsp"><i class="fa fa-circle-o"></i> 定义流程</a></li>
 	          	<li><a href="deployProcessDefinition.jsp"><i class="fa fa-circle-o"></i> 导入流程</a></li>
 	          	<li  class="active"><a href="listProcessModel.jsp"><i class="fa fa-circle-o"></i> 创建流程</a></li>
 	          </ul>
 	        </li>
 	        
-	        <li><a href="listMyTask.jsp"><i class="fa fa-book"></i> <span>代办任务</span></a></li>
+	        <li><a href="listMyTask.jsp"><i class="fa fa-book"></i> <span>本人代办流程</span></a></li>
 	        
 	         <li class="treeview">
 	          <a href="#">
-	            <i class="fa   fa-star-half-o"></i> <span>未结束流程</span>
+	            <i class="fa   fa-star-half-o"></i> <span>本人未结束流程</span>
 	            <i class="fa fa-angle-left pull-right"></i>
 	          </a>
 	          <ul class="treeview-menu">
-	            <li><a href="listMyProcess.jsp"><i class="fa fa-circle-o"></i> 已建流程</a></li>
-	            <li><a href="listMyTaskCompleted.jsp"><i class="fa fa-circle-o"></i> 已办任务</a></li>
+	            <li><a href="listMyProcess.jsp"><i class="fa fa-circle-o"></i> 本人已建流程</a></li>
+	            <li><a href="listMyTaskCompleted.jsp"><i class="fa fa-circle-o"></i> 本人已办任务</a></li>
 	          </ul>
 	        </li>
 	        
 	         <li class="treeview">
 	          <a href="#">
-	            <i class="fa  fa-star"></i> <span>已结束流程</span>
+	            <i class="fa  fa-star"></i> <span>本人已结束流程</span>
 	            <i class="fa fa-angle-left pull-right"></i>
 	          </a>
 	          <ul class="treeview-menu">
-	          <li><a href="listMyProcessHistory.jsp"><i class="fa fa-circle-o"></i> 已建流程</a></li>
-	            <li><a href="listMyTaskHistory.jsp"><i class="fa fa-circle-o"></i> 已办任务</a></li>
+	          <li><a href="listMyProcessHistory.jsp"><i class="fa fa-circle-o"></i> 本人已建流程</a></li>
+	            <li><a href="listMyTaskHistory.jsp"><i class="fa fa-circle-o"></i> 本人已办任务</a></li>
 	          </ul>
 	        </li>
           
@@ -220,33 +228,17 @@ desired effect
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
     <!-- Content Header (Page header) -->
-    <section class="content-header" style="display:none">
+    <section class="content-header">
       <h1>
-        Page Header
-        <small>Optional description</small>
+        流程模板列表
+        
+        <small></small>
       </h1>
-      <ol class="breadcrumb">
-        <li><a href="#"><i class="fa fa-dashboard"></i> Level</a></li>
-        <li class="active">Here</li>
-      </ol>
     </section>
 
     <!-- Main content -->
     <section class="content">
        <div class="box">
-            <div class="box-header">
-              <h3 class="box-title">流程模板列表</h3>
-
-              <div class="box-tools" style="display:none">
-                <div class="input-group input-group-sm" style="width: 150px;">
-                  <input type="text" name=" 	" class="form-control pull-right" placeholder="Search">
-
-                  <div class="input-group-btn">
-                    <button type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
-                  </div>
-                </div>
-              </div>
-            </div>
             <!-- /.box-header -->
             <form id="listForm" name="listForm"  method="post">
             		

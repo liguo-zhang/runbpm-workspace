@@ -9,6 +9,30 @@
 <%@ page import="org.runbpm.service.RunBPMService" %>
 
 
+<%
+
+String isSubmit = request.getParameter("isSubmit")+"";
+
+
+if(isSubmit!=null&&isSubmit.trim().equals("1")){
+	//需要记录session begin-->
+	Object userIdFromRequest = request.getParameter("userId");
+	if(userIdFromRequest!=null&&userIdFromRequest.toString().length()>0){
+		session.setAttribute("userId", userIdFromRequest);
+	}
+	//需要记录session end<--
+	
+	String redirectUrl = request.getSession().getAttribute("redirectUrl")+"";
+	if(redirectUrl!=null&&redirectUrl.trim().length()>0){
+		request.getSession().removeAttribute("redirectUrl");
+		response.sendRedirect(redirectUrl);
+	}else{
+		response.sendRedirect("listMyTask.jsp");
+	}
+}
+	
+%>
+
 <!DOCTYPE html>
 <!--
 This is a starter template page. Use this page to start your new project from
@@ -72,7 +96,7 @@ desired effect
   <div class="login-box-body">
     <p class="login-box-msg">开始~</p>
 
-    <form action="listMyTask.jsp" method="post">
+    <form action="login.jsp?isSubmit=1" method="post">
       <div class="form-group has-feedback">
       			<select class="form-control" name="userId">
                   <option value="user1">user1</option>

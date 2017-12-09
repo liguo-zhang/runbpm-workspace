@@ -5,7 +5,14 @@ String userId = null;
 if(userIdinSession!=null){
 	userId = userIdinSession.toString();
 }else{
-	response.sendRedirect("login.jsp");
+	if(session.getAttribute("party")== null){
+		if(null != request.getQueryString()){
+			session.setAttribute("redirectUrl", request.getRequestURL().append("?").append(request.getQueryString()).toString());
+		}else{
+			session.setAttribute("redirectUrl", request.getRequestURL().toString());
+		}
+		response.sendRedirect("login.jsp");
+	}
 }
 //判断session，记录userId. end-->
 %>
@@ -19,6 +26,7 @@ if(userIdinSession!=null){
 <%@ page import="org.runbpm.service.RunBPMService" %>
 <%@ page import="org.runbpm.workspace.Upload" %>
 <%@ page import="org.runbpm.workspace.ResultBean" %>
+
 
 <%
 
@@ -64,8 +72,17 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <link rel="stylesheet" href="modeler/css/diagram-js.css" />
   <link rel="stylesheet" href="modeler/vendor/bpmn-font/css/bpmn-embedded.css" />
   <link rel="stylesheet" href="modeler/css/app.css" />
-  
-
+  <style>
+	pre{
+	  	border-top:0 solid;
+	  	background-color:white;
+	}
+  	pre.prettyprint{
+		width: auto;
+		overflow: auto;
+		max-height: 500px
+	}
+  </style>
   <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
   <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
   <!--[if lt IE 9]>
@@ -179,32 +196,33 @@ desired effect
 	            <i class="fa fa-angle-left pull-right"></i>
 	          </a>
 	          <ul class="treeview-menu">
-	          	<li  class="active"><a href="deployProcessDefinition.jsp"><i class="fa fa-circle-o"></i> 导入流程</a></li>
+	          	<li  class="active"><a href="modeler.jsp"><i class="fa fa-circle-o"></i> 定义流程</a></li>
+	          	<li><a href="deployProcessDefinition.jsp"><i class="fa fa-circle-o"></i> 导入流程</a></li>
 	          	<li><a href="listProcessModel.jsp"><i class="fa fa-circle-o"></i> 创建流程</a></li>
 	          </ul>
 	        </li>
 	        
-	        <li><a href="listMyTask.jsp"><i class="fa fa-book"></i> <span>代办任务</span></a></li>
+	        <li><a href="listMyTask.jsp"><i class="fa fa-book"></i> <span>本人代办流程</span></a></li>
 	        
 	         <li class="treeview">
 	          <a href="#">
-	            <i class="fa   fa-star-half-o"></i> <span>未结束流程</span>
+	            <i class="fa   fa-star-half-o"></i> <span>本人未结束流程</span>
 	            <i class="fa fa-angle-left pull-right"></i>
 	          </a>
 	          <ul class="treeview-menu">
-	            <li><a href="listMyProcess.jsp"><i class="fa fa-circle-o"></i> 已建流程</a></li>
-	            <li><a href="listMyTaskCompleted.jsp"><i class="fa fa-circle-o"></i> 已办任务</a></li>
+	            <li><a href="listMyProcess.jsp"><i class="fa fa-circle-o"></i> 本人已建流程</a></li>
+	            <li><a href="listMyTaskCompleted.jsp"><i class="fa fa-circle-o"></i> 本人已办任务</a></li>
 	          </ul>
 	        </li>
 	        
 	         <li class="treeview">
 	          <a href="#">
-	            <i class="fa  fa-star"></i> <span>已结束流程</span>
+	            <i class="fa  fa-star"></i> <span>本人已结束流程</span>
 	            <i class="fa fa-angle-left pull-right"></i>
 	          </a>
 	          <ul class="treeview-menu">
-	          <li><a href="listMyProcessHistory.jsp"><i class="fa fa-circle-o"></i> 已建流程</a></li>
-	            <li><a href="listMyTaskHistory.jsp"><i class="fa fa-circle-o"></i> 已办任务</a></li>
+	          <li><a href="listMyProcessHistory.jsp"><i class="fa fa-circle-o"></i> 本人已建流程</a></li>
+	            <li><a href="listMyTaskHistory.jsp"><i class="fa fa-circle-o"></i> 本人已办任务</a></li>
 	          </ul>
 	        </li>
           
@@ -218,50 +236,56 @@ desired effect
 
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
-  		<section class="content-header" id="content_header_id">
-  			<ul class="buttons">
-			    <li>
-			      下载
-			    </li>
-			    <li>
-			      <a id="js-download-diagram" href title="download BPMN diagram">
-			        BPMN流程定义文件
-			      </a>
-			    </li>
-			    <li>
-			      <a id="js-download-svg" href title="download as SVG image">
-			        SVG图片
-			      </a>
-			    </li>
-			  </ul>
-  		</section>
   		
-  		
-  		
-  		
-  		<section class="content">
-		  		<ul class="nav nav-tabs">
-		  			<li class="active"><a data-toggle="tab" href="#draw_tab">画板</a></li>
-		  			<li><a data-toggle="tab" href="#bpmn_tab">BPMN流程定义文件</a></li>
-				</ul>
-  				<div class="tab-content">
-  					<div id="draw_tab" class="tab-pane fade in active">
-				  		<div class="content with-diagram nopadding" id="js-drop-zone" >
-								 <div class="row">
-								 		<div class="col-xs-7 col-sm-6 col-lg-8 nopadding">
-								    			<div class="canvas" id="js-canvas"></div>
-								    		</div>
-								      	<div class="col-xs-5 col-sm-6 col-lg-4 nopadding">
-								    			<div id="js-properties-panel"></div>
-								    		</div>
-								   </div>
-				          </div>
-				     </div>
-				      <div id="bpmn_tab" class="tab-pane fade">
-						    
-					  </div>
-				  </div>   
-          </section>
+  		  <section class="content" style="padding-top:5px">
+                  <ul class="nav nav-tabs">
+                    <li class="active"><a data-toggle="tab" href="#draw_tab">画板</a></li>
+                    <li><a data-toggle="tab" href="#bpmn_tab">XML源文件</a></li>
+                    <li class="pull-right">
+                    		<div class="btn-group">
+	                    		<input type="file" class="btn btn-default" id="diagram_file" value="选择本地文件"/>
+	                    		<button type="button" class="btn  btn-default">选择已部署定义</button>
+	                    	</div>
+	                    	
+	                    	<button type="button" class="btn btn-success">部署到流程引擎</button>
+	                    	
+                    </li>
+                  </ul>
+                  <div class="tab-content">
+                    <div id="draw_tab" class="tab-pane fade in active">
+                      <div class="content with-diagram nopadding" id="js-drop-zone" >
+                         <div class="row">
+                            <div class="col-xs-7 col-sm-6 col-lg-8 nopadding">
+                                  <div class="canvas" id="js-canvas"></div>
+                                </div>
+                                <div class="col-xs-5 col-sm-6 col-lg-4 nopadding">
+                                  <div id="js-properties-panel"></div>
+                                </div>
+                           </div>
+                          </div>
+                     </div>
+                      <div id="bpmn_tab" class="tab-pane fade">
+                        <div id="bpmn_tab_source"></div>
+                        <div>
+                         <ul class="buttons">
+                          <li>
+                            下载
+                          </li>
+                          <li>
+                            <a id="js-download-diagram" href title="download BPMN diagram">
+                              XML源文件
+                            </a>
+                          </li>
+                          <li>
+                            <a id="js-download-svg" href title="download as SVG image">
+                              SVG图片
+                            </a>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>   
+              </section>
   </div>
   <!-- /.content-wrapper -->
 
@@ -298,10 +322,14 @@ desired effect
 <script>
 $(function () {
 	
-	$("svg").height($(".content-wrapper").height()-$("#content_header_id").height()-20);
+	$("svg").height($(".content-wrapper").height()-50);
+	$("#bpmn_tab").height($(".content-wrapper").height()-50);
+	
 	
 });
 </script>
+
+
 
 
 <!-- Optionally, you can add Slimscroll and FastClick plugins.

@@ -12,14 +12,6 @@
 <%
 RunBPMService runBPMService = Configuration.getContext().getRunBPMService();
 
-//是否从登陆界面过来的，如果是的话，需要记录session begin-->
-Object userIdFromRequest = request.getParameter("userId");
-if(userIdFromRequest!=null&&userIdFromRequest.toString().length()>0){
-	session.setAttribute("userId", userIdFromRequest);
-	
-}
-//是否从登陆界面过来的，如果是的话，需要记录session end<--
-
 //判断session，记录userId
 Object userIdinSession = session.getAttribute("userId");
 String userId = null;
@@ -29,12 +21,12 @@ if(userIdinSession!=null){
 	response.sendRedirect("login.jsp");
 }
 
-//-----获取代办任务列表 开始-->
+//-----获取本人代办流程列表 开始-->
 EnumSet<EntityConstants.TASK_STATE> stateSet = EnumSet.noneOf(EntityConstants.TASK_STATE.class);  
 stateSet.add(EntityConstants.TASK_STATE.NOT_STARTED);  
 stateSet.add(EntityConstants.TASK_STATE.RUNNING);
 List<TaskInstance> taskList = runBPMService.listTaskInstanceByUserIdAndState(userId, stateSet);
-//-----获取代办任务列表 结束<-- 
+//-----获取本人代办流程列表 结束<-- 
 
 //----以下是 判断接受任务、接受任务、转到任务处理界面的逻辑
 String taskInstanceId = request.getParameter("taskInstanceId");
@@ -231,32 +223,33 @@ desired effect
 	            <i class="fa fa-angle-left pull-right"></i>
 	          </a>
 	          <ul class="treeview-menu">
+	          	<li><a href="modeler.jsp"><i class="fa fa-circle-o"></i> 定义流程</a></li>
 	          	<li><a href="deployProcessDefinition.jsp"><i class="fa fa-circle-o"></i> 导入流程</a></li>
 	          	<li><a href="listProcessModel.jsp"><i class="fa fa-circle-o"></i> 创建流程</a></li>
 	          </ul>
 	        </li>
 	        
-	        <li class="active"><a href="listMyTask.jsp"><i class="fa fa-book"></i> <span>代办任务</span></a></li>
+	        <li class="active"><a href="listMyTask.jsp"><i class="fa fa-book"></i> <span>本人代办流程</span></a></li>
 	        
 	         <li class="treeview">
 	          <a href="#">
-	            <i class="fa   fa-star-half-o"></i> <span>未结束流程</span>
+	            <i class="fa   fa-star-half-o"></i> <span>本人未结束流程</span>
 	            <i class="fa fa-angle-left pull-right"></i>
 	          </a>
 	          <ul class="treeview-menu">
-	            <li><a href="listMyProcess.jsp"><i class="fa fa-circle-o"></i> 已建流程</a></li>
-	            <li><a href="listMyTaskCompleted.jsp"><i class="fa fa-circle-o"></i> 已办任务</a></li>
+	            <li><a href="listMyProcess.jsp"><i class="fa fa-circle-o"></i> 本人已建流程</a></li>
+	            <li><a href="listMyTaskCompleted.jsp"><i class="fa fa-circle-o"></i> 本人已办任务</a></li>
 	          </ul>
 	        </li>
 	        
 	         <li class="treeview">
 	          <a href="#">
-	            <i class="fa  fa-star"></i> <span>已结束流程</span>
+	            <i class="fa  fa-star"></i> <span>本人已结束流程</span>
 	            <i class="fa fa-angle-left pull-right"></i>
 	          </a>
 	          <ul class="treeview-menu">
-	          <li><a href="listMyProcessHistory.jsp"><i class="fa fa-circle-o"></i> 已建流程</a></li>
-	            <li><a href="listMyTaskHistory.jsp"><i class="fa fa-circle-o"></i> 已办任务</a></li>
+	          <li><a href="listMyProcessHistory.jsp"><i class="fa fa-circle-o"></i> 本人已建流程</a></li>
+	            <li><a href="listMyTaskHistory.jsp"><i class="fa fa-circle-o"></i> 本人已办任务</a></li>
 	          </ul>
 	        </li>
           
@@ -272,7 +265,7 @@ desired effect
     <!-- Content Header (Page header) -->
     <section class="content-header">
       <h1>
-        代办任务
+        本人代办流程
         <small>需要本人经手，且流程未结束的工作项</small>
       </h1>
       <ol class="breadcrumb" style="display:none">
