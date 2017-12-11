@@ -16,31 +16,22 @@ if(userIdinSession!=null){
 }
 //判断session，记录userId. end-->
 %>
+
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 
 <%@ page import="java.util.*" %>   
+
    
 <%@ page import="org.runbpm.context.*" %>   
 <%@ page import="org.runbpm.entity.*" %>   
+<%@ page import="org.runbpm.workspace.*" %>
 <%@ page import="org.runbpm.service.RunBPMService" %>
-<%@ page import="org.runbpm.workspace.Upload" %>
-<%@ page import="org.runbpm.workspace.ResultBean" %>
-
 <%
+RunBPMService runBPMService = Configuration.getContext().getRunBPMService();
+List<ProcessHistory> processList =  runBPMService.listProcessHistoryByCreator(userId);
 
-String isSubmit = request.getParameter("isSubmit")+"";
-String code = null;
-String result = null;
-ResultBean rb = null;
-if(isSubmit!=null&&isSubmit.trim().equals("1")){
-	Upload upload = new Upload();
-	rb = upload.uploadFileAndImportProcess(request, response);
-	code = rb.getCode();
-	result = rb.getResult();
-}
 %>
-   
 
 <!DOCTYPE html>
 <!--
@@ -71,8 +62,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
   <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
   <!--[if lt IE 9]>
-  <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-  <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+  <script src="ui/https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+  <script src="ui/https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
   <![endif]-->
 </head>
 <!--
@@ -171,24 +162,19 @@ desired effect
 
     <!-- sidebar: style can be found in sidebar.less -->
     <section class="sidebar">
-    
-    <%
-	    RunBPMService runBPMService = Configuration.getContext().getRunBPMService();
-	    List list = runBPMService.loadProcessModels(true);
-    %>
-
+  
       <!-- Sidebar Menu -->
       <ul class="sidebar-menu">
-        <li class="header"></li>
+        <li class="header">
         
-	          <li class="treeview active">
+	         <li class="treeview">
 	          <a href="#">
 	            <i class="fa fa-table"></i> <span>流程定义管理</span>
 	            <i class="fa fa-angle-left pull-right"></i>
 	          </a>
 	          <ul class="treeview-menu">
-	           	<li><a href="modeler.jsp"><i class="fa fa-circle-o"></i> 定义流程</a></li>
-	          	<li  class="active"><a href="deployProcessDefinition.jsp"><i class="fa fa-circle-o"></i> 导入流程定义</a></li>
+	          	<li><a href="modeler.jsp"><i class="fa fa-circle-o"></i> 定义流程</a></li>
+	          	<li><a href="deployProcessDefinition.jsp"><i class="fa fa-circle-o"></i> 导入流程定义</a></li>
 	          	<li><a href="listProcessModel.jsp"><i class="fa fa-circle-o"></i> 创建流程</a></li>
 	          </ul>
 	        </li>
@@ -212,22 +198,21 @@ desired effect
 	            <i class="fa fa-angle-left pull-right"></i>
 	          </a>
 	          <ul class="treeview-menu">
-	          <li><a href="listMyProcessHistory.jsp"><i class="fa fa-circle-o"></i> 本人已建流程</a></li>
+	         	<li><a href="listMyProcessHistory.jsp"><i class="fa fa-circle-o"></i> 本人已建流程</a></li>
 	            <li><a href="listMyTaskHistory.jsp"><i class="fa fa-circle-o"></i> 本人已办任务</a></li>
 	          </ul>
 	        </li>
 	        
-	        <li class="treeview">
+	        <li class="treeview active">
 	          <a href="#">
 	            <i class="fa fa-bar-chart"></i> <span>流程监控</span>
 	            <i class="fa fa-angle-left pull-right"></i>
 	          </a>
 	          <ul class="treeview-menu">
 	          	<li><a href="listAllProcess.jsp"><i class="fa fa-circle-o"></i> 流程实例列表</a></li>
-	          	<li><a href="listAllProcessHistory.jsp"><i class="fa fa-circle-o"></i> 流程历史列表</a></li>
+	          	<li class="active"><a href="listAllProcessHistory"><i class="fa fa-circle-o"></i> 流程历史列表</a></li>
 	          </ul>
 	        </li>
-          
           
         </li>
       </ul>
@@ -239,65 +224,68 @@ desired effect
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
     <!-- Content Header (Page header) -->
-    
     <section class="content-header">
       <h1>
-        导入流程定义
-        <small>请选择本地硬盘中，符合BPMN XML格式的流程定义文件</small>
+        流程实例历史
+        <small>本人创建，且已经结束的流程实例</small>
       </h1>
+      <ol class="breadcrumb" style="display:none">
+        <li><a href="#"><i class="fa fa-dashboard"></i> Level</a></li>
+        <li class="active">Here</li>
+      </ol>
     </section>
 
     <!-- Main content -->
     <section class="content">
-      
-      <!-- general form elements -->
-          <div class="box box-primary">
-            <!-- /.box-header -->
-            <!-- form start -->
-            <form role="form" action="deployProcessDefinition.jsp?isSubmit=1"  enctype="multipart/form-data" method="post">
-              <div class="box-body">
-                <div class="form-group">
-                  <label for="exampleInputFile"></label>
-                  <input type="file" name="processDefinitionFile">
-                </div>
-               </div>
-              <!-- /.box-body -->
+       <div class="box">
+            <div class="box-header"  style="display:none">
+              <h3 class="box-title"></h3>
 
-              <div class="box-footer">
-                <button type="submit" class="btn btn-primary">导入</button>
-              </div>
-            </form>
-          </div>
-          <!-- /.box -->
-          
-           <!-- Modal -->
-              <div class="modal fade" id="deployResultModal" tabindex="-1" role="dialog" aria-labelledby="deployResultModal">
-                <div class="modal-dialog" role="document">
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                      <h4 class="modal-title" id="deployResultModal">
-                      <%
-                      if("0".equals(code)){
-                    	  out.println("部署成功");
-                      }else{
-                    	  out.println("部署失败["+result+"]");
-                      }
-                      %>
-                      </h4>
-                    </div>
-                    <div class="modal-body">
-                      <% 
-                    	 out.println(result);
-                      %>
-                    </div>
-                    <div class="modal-footer">
-                      <button type="button" class="btn btn-primary"  data-dismiss="modal">关闭</button>
-                    </div>
+              <div class="box-tools">
+                <div class="input-group input-group-sm" style="width: 150px;">
+                  <input type="text" name=" 	" class="form-control pull-right" placeholder="Search">
+
+                  <div class="input-group-btn">
+                    <button type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
                   </div>
                 </div>
               </div>
-              <!--//Modal-->
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body table-responsive no-padding">
+              <table class="table table-hover">
+                <tr>
+                  <th>流程实例ID</th>
+                  <th>流程定义ID</th>
+                  <th>流程定义名称</th>
+                  <th>流程模板ID</th>
+                  <th>状态</th>
+                  <th>创建人</th>
+                  <th>创建时间</th>
+                  <th>结束时间</th>
+                </tr>
+                <%
+                for(ProcessHistory processHistory : processList){
+                	
+                %>
+                <tr>
+                  <td><%=processHistory.getId() %></td>
+                  <td><a href="listActivityHistory.jsp?processInstanceId=<%=processHistory.getId() %>"><%=processHistory.getProcessDefinitionId() %></a></td>
+                  <td><%=processHistory.getName() %></td>
+                  <td><%=processHistory.getProcessModelId() %></td>
+                  <td><%=ConstantsUtil.getStateString(processHistory.getState()) %></td>
+                  <td><%=processHistory.getCreator() %></td>
+                  <td><%=processHistory.getCreateDate() %></td>
+                  <td><%=processHistory.getCompleteDate()%></td>
+                </tr>
+                <%
+                }
+                %>
+              </table>
+            </div>
+            <!-- /.box-body -->
+          </div>
+          <!-- /.box -->
 
     </section>
     <!-- /.content -->
@@ -322,8 +310,6 @@ desired effect
 </div>
 <!-- ./wrapper -->
 
-
-
 <!-- REQUIRED JS SCRIPTS -->
 
 <!-- jQuery 2.2.0 -->
@@ -333,24 +319,32 @@ desired effect
 <!-- AdminLTE App -->
 <script src="ui/dist/js/app.min.js"></script>
 
-
-<script>
-
-$(function () {
-	<%
-	if(isSubmit!=null&&isSubmit.trim().equals("1")){
-		out.println("$('#deployResultModal').modal({keyboard: true});");
-	}
-	%>
-	
-});
-
-</script>
-
-
 <!-- Optionally, you can add Slimscroll and FastClick plugins.
      Both of these plugins are recommended to enhance the
      user experience. Slimscroll is required when using the
      fixed layout. -->
+
+<script>
+
+$(document).ready(function() {
+  $('#create_process').on('click',function (e) {
+    e.preventDefault();
+    
+    var modelid = $(this).attr('modelid');
+    
+  });
+  
+});
+
+function PostAjaxContent(formName,actionName){
+  var data=$(formName).serialize();
+    $.post(actionName, data, function (result) { 
+      $('#ajax-content').html(result);
+    $('.preloader').hide();
+    }, "text");
+}
+
+
+</script>
 </body>
 </html>

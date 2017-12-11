@@ -169,12 +169,12 @@ desired effect
         
 	         <li class="treeview">
 	          <a href="#">
-	            <i class="fa fa-table"></i> <span>流程管理</span>
+	            <i class="fa fa-table"></i> <span>流程定义管理</span>
 	            <i class="fa fa-angle-left pull-right"></i>
 	          </a>
 	          <ul class="treeview-menu">
 	          	<li><a href="modeler.jsp"><i class="fa fa-circle-o"></i> 定义流程</a></li>
-	          	<li><a href="deployProcessDefinition.jsp"><i class="fa fa-circle-o"></i> 导入流程</a></li>
+	          	<li><a href="deployProcessDefinition.jsp"><i class="fa fa-circle-o"></i> 导入流程定义</a></li>
 	          	<li><a href="listProcessModel.jsp"><i class="fa fa-circle-o"></i> 创建流程</a></li>
 	          </ul>
 	        </li>
@@ -202,7 +202,22 @@ desired effect
 	            <li><a href="listMyTaskHistory.jsp"><i class="fa fa-circle-o"></i> 本人已办任务</a></li>
 	          </ul>
 	        </li>
-          
+	        
+	        <li class="treeview">
+	          <a href="#">
+	            <i class="fa fa-bar-chart"></i> <span>流程监控</span>
+	            <i class="fa fa-angle-left pull-right"></i>
+	          </a>
+	          <ul class="treeview-menu">
+	          	<li><a href="listAllProcess.jsp"><i class="fa fa-circle-o"></i> 流程-实例列表</a></li>
+	          	<li><a href="listAllProcessHistory.jsp"><i class="fa fa-circle-o"></i> 流程-历史列表</a></li>
+	          	<li><a href="listAllActivity.jsp"><i class="fa fa-circle-o"></i> 活动-实例列表</a></li>
+	          	<li><a href="listAllActivityHistory.jsp"><i class="fa fa-circle-o"></i> 活动-历史列表</a></li>
+	          	<li><a href="listAllTask.jsp"><i class="fa fa-circle-o"></i> 任务-实例列表</a></li>
+	          	<li><a href="listAllTaskHistory.jsp"><i class="fa fa-circle-o"></i> 任务-历史列表</a></li>
+	          	
+	          </ul>
+	        </li>
         </li>
       </ul>
       <!-- /.sidebar-menu -->
@@ -247,7 +262,9 @@ desired effect
                   <th>流程实例ID</th>
                   <th>流程定义ID</th>
                   <th>流程定义名称</th>
+                  <th>流程模板ID</th>
                   <th>状态</th>
+                  <th>创建人</th>
                   <th>创建时间</th>
                   <th>结束时间</th>
                 </tr>
@@ -259,7 +276,9 @@ desired effect
                   <td><%=processHistory.getId() %></td>
                   <td><a href="listActivityHistory.jsp?processInstanceId=<%=processHistory.getId() %>"><%=processHistory.getProcessDefinitionId() %></a></td>
                   <td><%=processHistory.getName() %></td>
+                  <td><%=processHistory.getProcessModelId() %></td>
                   <td><%=ConstantsUtil.getStateString(processHistory.getState()) %></td>
+                  <td><%=processHistory.getCreator() %></td>
                   <td><%=processHistory.getCreateDate() %></td>
                   <td><%=processHistory.getCompleteDate()%></td>
                 </tr>

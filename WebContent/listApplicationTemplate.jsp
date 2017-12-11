@@ -207,12 +207,12 @@ desired effect
         
 	         <li class="treeview">
 	          <a href="#">
-	            <i class="fa fa-table"></i> <span>流程管理</span>
+	            <i class="fa fa-table"></i> <span>流程定义管理</span>
 	            <i class="fa fa-angle-left pull-right"></i>
 	          </a>
 	          <ul class="treeview-menu">
 	          	<li><a href="modeler.jsp"><i class="fa fa-circle-o"></i> 定义流程</a></li>
-	          	<li><a href="deployProcessDefinition.jsp"><i class="fa fa-circle-o"></i> 导入流程</a></li>
+	          	<li><a href="deployProcessDefinition.jsp"><i class="fa fa-circle-o"></i> 导入流程定义</a></li>
 	          	<li><a href="listProcessModel.jsp"><i class="fa fa-circle-o"></i> 创建流程</a></li>
 	          </ul>
 	        </li>
@@ -238,6 +238,17 @@ desired effect
 	          <ul class="treeview-menu">
 	          <li><a href="listMyProcessHistory.jsp"><i class="fa fa-circle-o"></i> 本人已建流程</a></li>
 	            <li><a href="listMyTaskHistory.jsp"><i class="fa fa-circle-o"></i> 本人已办任务</a></li>
+	          </ul>
+	        </li>
+	        
+	        <li class="treeview">
+	          <a href="#">
+	            <i class="fa fa-bar-chart"></i> <span>流程监控</span>
+	            <i class="fa fa-angle-left pull-right"></i>
+	          </a>
+	          <ul class="treeview-menu">
+	          	<li><a href="listAllProcess.jsp"><i class="fa fa-circle-o"></i> 流程实例列表</a></li>
+	          	<li><a href="listAllProcessHistory.jsp"><i class="fa fa-circle-o"></i> 流程历史列表</a></li>
 	          </ul>
 	        </li>
           

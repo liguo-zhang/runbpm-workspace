@@ -33,8 +33,10 @@ String isTerminated = request.getParameter("isTerminated")+"";
 String processInstanceId = request.getParameter("processInstanceId");
 if(isTerminated!=null&&isTerminated.trim().equals("1")){
 	runBPMService.terminateProcessInstance(Long.parseLong(processInstanceId));
+	response.sendRedirect("listMyProcess.jsp?isTerminated=0");
 }
-List<ProcessInstance> processList =  runBPMService.listProcessInstanceByCreator(userId);
+List<ProcessInstance>  processList =  runBPMService.listProcessInstanceByCreator(userId);
+
 
 %>
 
@@ -175,12 +177,12 @@ desired effect
         
 	         <li class="treeview">
 	          <a href="#">
-	            <i class="fa fa-table"></i> <span>流程管理</span>
+	            <i class="fa fa-table"></i> <span>流程定义管理</span>
 	            <i class="fa fa-angle-left pull-right"></i>
 	          </a>
 	          <ul class="treeview-menu">
 	          	<li><a href="modeler.jsp"><i class="fa fa-circle-o"></i> 定义流程</a></li>
-	          	<li><a href="deployProcessDefinition.jsp"><i class="fa fa-circle-o"></i> 导入流程</a></li>
+	          	<li><a href="deployProcessDefinition.jsp"><i class="fa fa-circle-o"></i> 导入流程定义</a></li>
 	          	<li><a href="listProcessModel.jsp"><i class="fa fa-circle-o"></i> 创建流程</a></li>
 	          </ul>
 	        </li>
@@ -206,6 +208,17 @@ desired effect
 	          <ul class="treeview-menu">
 	          <li><a href="listMyProcessHistory.jsp"><i class="fa fa-circle-o"></i> 本人已建流程</a></li>
 	            <li><a href="listMyTaskHistory.jsp"><i class="fa fa-circle-o"></i> 本人已办任务</a></li>
+	          </ul>
+	        </li>
+	        
+	        <li class="treeview">
+	          <a href="#">
+	            <i class="fa fa-bar-chart"></i> <span>流程监控</span>
+	            <i class="fa fa-angle-left pull-right"></i>
+	          </a>
+	          <ul class="treeview-menu">
+	          	<li><a href="listAllProcess.jsp"><i class="fa fa-circle-o"></i> 流程实例列表</a></li>
+	          	<li><a href="listAllProcessHistory.jsp"><i class="fa fa-circle-o"></i> 流程历史列表</a></li>
 	          </ul>
 	        </li>
           
@@ -239,7 +252,6 @@ desired effect
               <div class="box-tools">
                 <div class="input-group input-group-sm" style="width: 150px;">
                   <input type="text" name=" 	" class="form-control pull-right" placeholder="Search">
-
                   <div class="input-group-btn">
                     <button type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
                   </div>
@@ -253,7 +265,9 @@ desired effect
                   <th>流程实例ID</th>
                   <th>流程定义ID</th>
                   <th>流程定义名称</th>
+                  <th>流程模板ID</th>
                   <th>状态</th>
+                  <th>创建人</th>
                   <th>创建时间</th>
                   <th>最近更新时间</th>
                   <th>动作</th>
@@ -266,14 +280,15 @@ desired effect
                   <td><%=processInstance.getId() %></td>
                   <td><a href="listActivity.jsp?processInstanceId=<%=processInstance.getId() %>"><%=processInstance.getProcessDefinitionId() %></a></td>
                   <td><%=processInstance.getName() %></td>
+                  <td><%=processInstance.getProcessModelId() %></td>
                   <td><%=ConstantsUtil.getStateString(processInstance.getState()) %></td>
+                  <td><%=processInstance.getCreator() %></td>
                   <td><%=processInstance.getCreateDate() %></td>
                   <td><%=processInstance.getModifyDate()%></td>
                   <td>
                        <div class="form-group">
-		                  <button type="button" processInstanceId="<%=processInstance.getId() %>" class="btn btn-info pull-right" id="terminateProcess">终止</button>
+		                  <button type="button" processInstanceId="<%=processInstance.getId() %>" class="btn btn-info pull-right" id="terminated_process_<%=processInstance.getId() %>" >终止</button>
 		                </div>
-		                <form id="submit_form" method="post"></form>
                   </td>
                 </tr>
                 <%
@@ -308,6 +323,30 @@ desired effect
 </div>
 <!-- ./wrapper -->
 
+  <!-- Modal -->
+              <div class="modal fade" id="hiddenModal" tabindex="-1" role="dialog" aria-labelledby="deployResultModal">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                      <h4 class="modal-title" id="deployResultModal">接受任务</h4>
+                     
+                    </div>
+                    <div class="modal-body">
+                      是否终止流程？
+                    </div>
+                    <div class="modal-footer">
+                      <input type="hidden" id="terminatedProcessId">
+                    	  <button type="button" id="terminateProcessSubmit" class="btn btn-primary">确认</button>
+                      <button type="button" class="btn btn-default"  data-dismiss="modal">取消</button>
+                      <form id="submit_form" method="post"></form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!--//Modal-->
+
 <!-- REQUIRED JS SCRIPTS -->
 
 <!-- jQuery 2.2.0 -->
@@ -325,14 +364,23 @@ desired effect
 <script>
 
 $(document).ready(function() {
-  $('#terminateProcess').on('click',function (e) {
-    e.preventDefault();
-    var processInstanceId = $(this).attr('processInstanceId');
-    var action = 'listMyProcess.jsp?isTerminated=1&processInstanceId='+processInstanceId;
-    $('#submit_form').attr('action', action);
-    $("#submit_form").submit();
-    
+	
+	$("button[id^='terminated_process']").each(function(i){
+		$(this).on('click',function (e) {
+		    e.preventDefault();
+		    var processInstanceId = $(this).attr('processInstanceId');
+		    $('#terminatedProcessId').val(processInstanceId);
+		    $('#hiddenModal').modal({keyboard: true});
+		    
+		});
   });
+	
+	 $("#terminateProcessSubmit").on('click',function (e) {
+		 	var processInstanceId = $('#terminatedProcessId').val();
+		 	var action = 'listMyProcess.jsp?isTerminated=1&processInstanceId='+processInstanceId;
+		    $('#submit_form').attr('action', action);
+		    $("#submit_form").submit();
+	});
   
 });
 

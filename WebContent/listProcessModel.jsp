@@ -26,6 +26,8 @@ if(userIdinSession!=null){
 <%@ page import="org.runbpm.context.*" %>   
 <%@ page import="org.runbpm.entity.*" %>   
 <%@ page import="org.runbpm.service.RunBPMService" %>
+<%@ page import="com.alibaba.fastjson.JSON" %>
+
 <%
 RunBPMService runBPMService = Configuration.getContext().getRunBPMService();
 List<ProcessModel> processModelist = runBPMService.loadProcessModels(true);
@@ -73,7 +75,17 @@ scratch. This page gets rid of all links and provides the needed markup only.
         apply the skin class to the body tag so the changes take effect.
   -->
   <link rel="stylesheet" href="ui/dist/css/skins/skin-blue.min.css">
-
+  <link rel="stylesheet" href="ui/plugins/treegrid/jquery.treegrid.css">
+  
+  	<style>
+	td.details-control {
+	    background: url('ui/plugins/datatables/images/details_open.png') no-repeat center center;
+	    cursor: pointer;
+	}
+	tr.shown td.details-control {
+	    background: url('ui/plugins/datatables/images/details_close.png') no-repeat center center;
+	}
+	</style>
   <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
   <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
   <!--[if lt IE 9]>
@@ -184,12 +196,12 @@ desired effect
         
 	         <li class="treeview active">
 	          <a href="#">
-	            <i class="fa fa-table"></i> <span>流程管理</span>
+	            <i class="fa fa-table"></i> <span>流程定义管理</span>
 	            <i class="fa fa-angle-left pull-right"></i>
 	          </a>
 	          <ul class="treeview-menu">
 	          	<li><a href="modeler.jsp"><i class="fa fa-circle-o"></i> 定义流程</a></li>
-	          	<li><a href="deployProcessDefinition.jsp"><i class="fa fa-circle-o"></i> 导入流程</a></li>
+	          	<li><a href="deployProcessDefinition.jsp"><i class="fa fa-circle-o"></i> 导入流程定义</a></li>
 	          	<li  class="active"><a href="listProcessModel.jsp"><i class="fa fa-circle-o"></i> 创建流程</a></li>
 	          </ul>
 	        </li>
@@ -215,6 +227,17 @@ desired effect
 	          <ul class="treeview-menu">
 	          <li><a href="listMyProcessHistory.jsp"><i class="fa fa-circle-o"></i> 本人已建流程</a></li>
 	            <li><a href="listMyTaskHistory.jsp"><i class="fa fa-circle-o"></i> 本人已办任务</a></li>
+	          </ul>
+	        </li>
+	        
+	        <li class="treeview">
+	          <a href="#">
+	            <i class="fa fa-bar-chart"></i> <span>流程监控</span>
+	            <i class="fa fa-angle-left pull-right"></i>
+	          </a>
+	          <ul class="treeview-menu">
+	          	<li><a href="listAllProcess.jsp"><i class="fa fa-circle-o"></i> 流程实例列表</a></li>
+	          	<li><a href="listAllProcessHistory.jsp"><i class="fa fa-circle-o"></i> 流程历史列表</a></li>
 	          </ul>
 	        </li>
           
@@ -244,32 +267,47 @@ desired effect
             		
             </form>
             
-	            <div class="box-body table-responsive no-padding">
-	              <table class="table table-hover">
+	           <div class="box-body table-responsive no-padding">
+	              <table class="table table-hover tree">
 	                <tr>
 	                  <th>模板ID</th>
 	                  <th>流程定义</th>
-	                  <th>流程定义版本</th>
+	                  <th>最新流程定义版本</th>
 	                  <th>名称</th>
 	                  <th>描述</th>
 	                  <th>创建时间</th>
 	                  <th>操作</th>
 	                </tr>
 	                <%
+	                int i = 0;
 	                for(ProcessModel pm : processModelist){
-	                	
+	                		i++;
 	                %>
-	                <tr>
-	                  <td><%=pm.getId() %></td>
-	                  <td><%=pm.getProcessDefinition().getId() %></td>
-	                  <td><%=pm.getVersion() %></td>
-	                  <td><%=pm.getName() %></td>
-	                  <td><%=pm.getProcessDefinition().getDocumentation() %></td>
-	                  <td><%=pm.getCreateDate() %></td>
-	                  <td><button id="create_process_<%=pm.getId() %>" modelId='<%=pm.getId() %>' type="button" class="btn btn-info btn-sm">创建流程</button></td>
-	                </tr>
-	                <%
-	                
+			                <tr class="treegrid-A<%=i%>">
+			                  <td><%=pm.getId() %></td>
+			                  
+			                  <td><%=pm.getProcessDefinition().getId() %></td>
+			                  <td><%=pm.getVersion() %> <a href id="view_all_version_<%=pm.getId() %>" modelId='<%=pm.getId() %>' class="text-muted "></a></td>
+			                  <td><%=pm.getName() %></td>
+			                  <td><%=pm.getProcessDefinition().getDocumentation() %></td>
+			                  <td><%=pm.getCreateDate() %></td>
+			                  <td><button id="create_process_<%=pm.getId() %>" modelId='<%=pm.getId() %>' type="button" class="btn btn-info btn-sm">创建流程</button></td>
+			                </tr>
+			        <%   
+			             List<ProcessModel> subList = runBPMService.loadProcessModelsByProcessDefinitionId(pm.getProcessDefinitionId());
+	                		for(ProcessModel subPM : subList){
+	                	%>		
+	                			<tr class="treegrid-<%=subPM.getId() %> treegrid-parent-A<%=i%>">
+			                  <td><%=subPM.getId() %></td>
+			                  <td><%=subPM.getProcessDefinition().getId() %></td>
+			                  <td><%=subPM.getVersion() %></td>
+			                  <td><%=subPM.getName() %></td>
+			                  <td><%=subPM.getProcessDefinition().getDocumentation() %></td>
+			                  <td><%=subPM.getCreateDate() %></td>
+			                  <td><button id="create_process_<%=subPM.getId() %>" modelId='<%=subPM.getId() %>' type="button" class="btn btn-info btn-sm">创建流程</button></td>
+			                </tr>
+	                <%			
+	                		}
 	                }
 	                %>
 	              </table>
@@ -301,6 +339,37 @@ desired effect
                     	out.println(result);
                       
                       %>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-primary"  data-dismiss="modal">关闭</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!--//Modal-->
+              
+              <!-- Modal -->
+              <div class="modal fade" id="allProcessListModal" tabindex="-1" role="dialog" aria-labelledby="deployResultModal">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                      <h4 class="modal-title" id="deployResultModal">
+                      该流程定义所导入的所有版本
+                      </h4>
+                    </div>
+                    <div class="modal-body">
+                      <table class="table table-hover">
+	                <tr>
+	                  <th>模板ID</th>
+	                  <th>流程定义</th>
+	                  <th>最新流程定义版本</th>
+	                  <th>名称</th>
+	                  <th>描述</th>
+	                  <th>创建时间</th>
+	                  <th>操作</th>
+	                </tr>
+	              </table>
                     </div>
                     <div class="modal-footer">
                       <button type="button" class="btn btn-primary"  data-dismiss="modal">关闭</button>
@@ -342,13 +411,19 @@ desired effect
 <!-- AdminLTE App -->
 <script src="ui/dist/js/app.min.js"></script>
 
+<script src="ui/plugins/treegrid/jquery.treegrid.js"></script>
+<script src="ui/plugins/treegrid/jquery.treegrid.bootstrap3.js"></script>
+
 <!-- Optionally, you can add Slimscroll and FastClick plugins.
      Both of these plugins are recommended to enhance the
      user experience. Slimscroll is required when using the
      fixed layout. -->
 <script>
+
+
+ 
 $(document).ready(function() {
-	
+	//--------发起流程
 	<%
 	if(isSubmit!=null&&isSubmit.trim().equals("1")){
 		out.println("$('#deployResultModal').modal({keyboard: true});");
@@ -369,8 +444,25 @@ $(document).ready(function() {
 		    
 		});
 	});
-    
-});
+	
+	$("a[id^='view_all_version_']").each(function(i){
+		 $(this).on('click',function (e) {
+			 $('#allProcessListModal').modal({keyboard: true});
+		    
+		});
+	});
+	
+	
+	
+	//<-----发起流程
+    $('.tree').treegrid({
+        treeColumn: 2,
+        initialState:"collapsed"
+	});
+   
+} );
+
+
 
 </script>
 </body>
