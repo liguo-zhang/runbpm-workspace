@@ -304,7 +304,7 @@ desired effect
 			                  <td><%=subPM.getName() %></td>
 			                  <td><%=subPM.getProcessDefinition().getDocumentation() %></td>
 			                  <td><%=subPM.getCreateDate() %></td>
-			                  <td><button id="create_process_<%=subPM.getId() %>" modelId='<%=subPM.getId() %>' type="button" class="btn btn-info btn-sm">创建流程</button></td>
+			                  <td><button id="create_process_<%=subPM.getId() %>" modelId='<%=subPM.getId() %>' type="button" class="btn btn-default btn-sm">创建流程</button></td>
 			                </tr>
 	                <%			
 	                		}
