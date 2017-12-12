@@ -287,7 +287,7 @@ desired effect
 			                  <td><%=pm.getId() %></td>
 			                  
 			                  <td><%=pm.getProcessDefinition().getId() %></td>
-			                  <td><%=pm.getVersion() %> <a href id="view_all_version_<%=pm.getId() %>" modelId='<%=pm.getId() %>' class="text-muted "></a></td>
+			                  <td><%=pm.getVersion() %> </td>
 			                  <td><%=pm.getName() %></td>
 			                  <td><%=pm.getProcessDefinition().getDocumentation() %></td>
 			                  <td><%=pm.getCreateDate() %></td>
@@ -347,37 +347,7 @@ desired effect
                 </div>
               </div>
               <!--//Modal-->
-              
-              <!-- Modal -->
-              <div class="modal fade" id="allProcessListModal" tabindex="-1" role="dialog" aria-labelledby="deployResultModal">
-                <div class="modal-dialog" role="document">
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                      <h4 class="modal-title" id="deployResultModal">
-                      该流程定义所导入的所有版本
-                      </h4>
-                    </div>
-                    <div class="modal-body">
-                      <table class="table table-hover">
-	                <tr>
-	                  <th>模板ID</th>
-	                  <th>流程定义</th>
-	                  <th>最新流程定义版本</th>
-	                  <th>名称</th>
-	                  <th>描述</th>
-	                  <th>创建时间</th>
-	                  <th>操作</th>
-	                </tr>
-	              </table>
-                    </div>
-                    <div class="modal-footer">
-                      <button type="button" class="btn btn-primary"  data-dismiss="modal">关闭</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <!--//Modal-->
+             
 
     </section>
     <!-- /.content -->
@@ -441,13 +411,6 @@ $(document).ready(function() {
 		    
 		    $("#listForm").submit();
 		    
-		    
-		});
-	});
-	
-	$("a[id^='view_all_version_']").each(function(i){
-		 $(this).on('click',function (e) {
-			 $('#allProcessListModal').modal({keyboard: true});
 		    
 		});
 	});

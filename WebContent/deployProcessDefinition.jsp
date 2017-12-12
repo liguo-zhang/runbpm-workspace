@@ -258,13 +258,13 @@ desired effect
               <div class="box-body">
                 <div class="form-group">
                   <label for="exampleInputFile"></label>
-                  <input type="file" name="processDefinitionFile">
+                  <input type="file" name="processDefinitionFile" id="processDefinitionFile">
                 </div>
                </div>
               <!-- /.box-body -->
 
               <div class="box-footer">
-                <button type="submit" class="btn btn-primary">导入</button>
+                <button type="button" id="deploySubmit" class="btn btn-primary">导入</button>
               </div>
             </form>
           </div>

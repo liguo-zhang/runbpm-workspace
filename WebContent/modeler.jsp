@@ -40,6 +40,10 @@ if(isSubmit!=null&&isSubmit.trim().equals("1")){
 	code = rb.getCode();
 	result = rb.getResult();
 }
+
+RunBPMService runBPMService = Configuration.getContext().getRunBPMService();
+List<ProcessModel> processModelist = runBPMService.loadProcessModels(true);
+
 %>
    
 
@@ -247,7 +251,7 @@ desired effect
 
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
-  		
+	                    	
   		  <section class="content" style="padding-top:5px">
                   <ul class="nav nav-tabs">
                     <li class="active"><a data-toggle="tab" href="#draw_tab">画板</a></li>
@@ -255,11 +259,9 @@ desired effect
                     <li class="pull-right">
                     		<div class="btn-group">
 	                    		<input type="file" class="btn btn-default" id="diagram_file" value="选择本地文件"/>
-	                    		<button type="button" class="btn  btn-default">选择已部署定义</button>
+	                    		<button type="button" id="selectProcessDefinitionInEngine" class="btn  btn-default">选择已部署定义</button>
 	                    	</div>
-	                    	
-	                    	<button type="button" class="btn btn-success">部署到流程引擎</button>
-	                    	
+	                    	<button type="button" id="deployProcessDefinition" class="btn btn-success">部署到流程引擎</button>
                     </li>
                   </ul>
                   <div class="tab-content">
@@ -318,6 +320,66 @@ desired effect
 </div>
 <!-- ./wrapper -->
 
+ <!-- Modal -->
+              <div class="modal fade" id="allProcessListModal" tabindex="-1" role="dialog" aria-labelledby="deployResultModal">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    </div>
+                    <div class="modal-body">
+                    			
+							<table class="table table-hover tree">
+								                <tr>
+								                  <th>ID</th>
+								                  <th nowrap>流程定义</th>
+								                  <th nowrap>版本</th>
+								                  <th nowrap>名称</th>
+								                  <th nowrap></th>
+								                </tr>
+								                <%
+								                int i = 0;
+								                for(ProcessModel pm : processModelist){
+								                		i++;
+								                %>
+										                <tr class="treegrid-A<%=i%>">
+										                  <td><%=pm.getId() %></td>
+										                  
+										                  <td nowrap><%=pm.getProcessDefinition().getId() %></td>
+										                  <td nowrap><%=pm.getVersion() %> </td>
+										                  <td><%=pm.getName() %></td>
+										                  
+										                  <td>
+											                  <button id="choose_process_<%=pm.getId() %>"  modelId='<%=pm.getId() %>' type="button" class="btn btn-info btn-sm">选择</button>
+										                  </td>
+										                </tr>
+										        <%   
+										             List<ProcessModel> subList = runBPMService.loadProcessModelsByProcessDefinitionId(pm.getProcessDefinitionId());
+								                		for(ProcessModel subPM : subList){
+								                	%>		
+								                			<tr class="treegrid-<%=subPM.getId() %> treegrid-parent-A<%=i%>">
+										                  <td nowrap><%=subPM.getId() %></td>
+										                  <td nowrap><%=subPM.getProcessDefinition().getId() %></td>
+										                  <td nowrap><%=subPM.getVersion() %></td>
+										                  <td><%=subPM.getName() %></td>
+										                  <td>
+											                  <button id="choose_process_<%=subPM.getId() %>" modelId='<%=subPM.getId() %>' type="button" class="btn btn-default btn-sm">选择</button>
+										                  </td>
+										                </tr>
+								                <%			
+								                		}
+								                }
+								                %>
+								              </table>
+                     
+                    </div>
+                    <div class="modal-footer" style="display:none">
+                      <button type="button" class="btn btn-primary"  data-dismiss="modal" >关闭</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!--//Modal-->
 
 
 <!-- REQUIRED JS SCRIPTS -->
@@ -328,19 +390,38 @@ desired effect
 <script src="ui/bootstrap/js/bootstrap.min.js"></script>
 <!-- AdminLTE App -->
 <script src="ui/dist/js/app.min.js"></script>
+<script src="ui/plugins/treegrid/jquery.treegrid.js"></script>
+<script src="ui/plugins/treegrid/jquery.treegrid.bootstrap3.js"></script>
 
 <script src="modeler/index.js"></script>
 <script>
-$(function () {
+$(document).ready(function() {
 	
 	$("svg").height($(".content-wrapper").height()-50);
 	$("#bpmn_tab").height($(".content-wrapper").height()-50);
 	
+	$("#selectProcessDefinitionInEngine").on('click',function (e) {
+		$('#allProcessListModal').modal({keyboard: true});
+	});
+	
+	 $('.tree').treegrid({
+	        treeColumn: 2,
+	        initialState:"collapsed"
+	});
 	
 });
+
+function choose_process_back(){
+	$('#allProcessListModal').modal('hide');
+}
+
+function deployProcessDefinition_back(data){
+	alert(data.id);
+	alert(data.name);
+	
+}
+
 </script>
-
-
 
 
 <!-- Optionally, you can add Slimscroll and FastClick plugins.
