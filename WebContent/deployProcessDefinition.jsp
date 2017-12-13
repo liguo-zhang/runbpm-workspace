@@ -25,22 +25,6 @@ if(userIdinSession!=null){
 <%@ page import="org.runbpm.entity.*" %>   
 <%@ page import="org.runbpm.service.RunBPMService" %>
 <%@ page import="org.runbpm.workspace.Upload" %>
-<%@ page import="org.runbpm.workspace.ResultBean" %>
-
-<%
-
-String isSubmit = request.getParameter("isSubmit")+"";
-String code = null;
-String result = null;
-ResultBean rb = null;
-if(isSubmit!=null&&isSubmit.trim().equals("1")){
-	Upload upload = new Upload();
-	rb = upload.uploadFileAndImportProcess(request, response);
-	code = rb.getCode();
-	result = rb.getResult();
-}
-%>
-   
 
 <!DOCTYPE html>
 <!--
@@ -174,7 +158,7 @@ desired effect
     
     <%
 	    RunBPMService runBPMService = Configuration.getContext().getRunBPMService();
-	    List list = runBPMService.loadProcessModels(true);
+	    List list = runBPMService.loadProcessModels();
     %>
 
       <!-- Sidebar Menu -->
@@ -254,7 +238,7 @@ desired effect
           <div class="box box-primary">
             <!-- /.box-header -->
             <!-- form start -->
-            <form role="form" action="deployProcessDefinition.jsp?isSubmit=1"  enctype="multipart/form-data" method="post">
+            <form role="form" enctype="multipart/form-data" method="post">
               <div class="box-body">
                 <div class="form-group">
                   <label for="exampleInputFile"></label>
@@ -276,20 +260,12 @@ desired effect
                   <div class="modal-content">
                     <div class="modal-header">
                       <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                      <h4 class="modal-title" id="deployResultModal">
-                      <%
-                      if("0".equals(code)){
-                    	  out.println("部署成功");
-                      }else{
-                    	  out.println("部署失败["+result+"]");
-                      }
-                      %>
+                      <h4 class="modal-title" id="modalTitleText">
+                     
                       </h4>
                     </div>
-                    <div class="modal-body">
-                      <% 
-                    	 out.println(result);
-                      %>
+                    <div class="modal-body" id="modalBodyText">
+                      
                     </div>
                     <div class="modal-footer">
                       <button type="button" class="btn btn-primary"  data-dismiss="modal">关闭</button>
@@ -337,11 +313,39 @@ desired effect
 <script>
 
 $(function () {
-	<%
-	if(isSubmit!=null&&isSubmit.trim().equals("1")){
-		out.println("$('#deployResultModal').modal({keyboard: true});");
-	}
-	%>
+	
+	  $('#deploySubmit').on('click',function (e) {
+		    
+			 var file = document.getElementById('processDefinitionFile').files[0]; //Files[0] = 1st file
+			 var reader = new FileReader();
+			 reader.readAsText(file, 'UTF-8');
+			 reader.onload = shipOff;
+		    
+	 });
+	  
+	  function shipOff(event) {
+		  	var deployXmlContent = event.target.result;
+		    var 	name = document.getElementById('processDefinitionFile').files[0].name;
+		  
+		  	var url = "ajaxSubmitHandler.jsp"; 
+	        var data = {"isDeployProcessDefinition":"1","deployXmlContent":deployXmlContent}
+	        $.ajax({
+	           type: "POST",
+	           url: url,
+	           data: data, // serializes the form's elements.
+	           success: function(data)
+	           {
+					if(data.code=='0'){
+						$('#modalTitleText').html("部署成功");
+					}else{
+						$('#modalTitleText').html("部署失败");
+					}  
+					$('#modalBodyText').html(data.msg);
+					$('#deployResultModal').modal({keyboard: true});
+	           }
+	         });
+	  }
+
 	
 });
 

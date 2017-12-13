@@ -25,25 +25,10 @@ if(userIdinSession!=null){
 <%@ page import="org.runbpm.entity.*" %>   
 <%@ page import="org.runbpm.service.RunBPMService" %>
 <%@ page import="org.runbpm.workspace.Upload" %>
-<%@ page import="org.runbpm.workspace.ResultBean" %>
-
 
 <%
-
-String isSubmit = request.getParameter("isSubmit")+"";
-String code = null;
-String result = null;
-ResultBean rb = null;
-if(isSubmit!=null&&isSubmit.trim().equals("1")){
-	Upload upload = new Upload();
-	rb = upload.uploadFileAndImportProcess(request, response);
-	code = rb.getCode();
-	result = rb.getResult();
-}
-
 RunBPMService runBPMService = Configuration.getContext().getRunBPMService();
-List<ProcessModel> processModelist = runBPMService.loadProcessModels(true);
-
+List<ProcessModel> processModelist = runBPMService.loadProcessModels();
 %>
    
 
@@ -320,7 +305,7 @@ desired effect
 </div>
 <!-- ./wrapper -->
 
- <!-- Modal -->
+ 			<!-- Modal -->
               <div class="modal fade" id="allProcessListModal" tabindex="-1" role="dialog" aria-labelledby="deployResultModal">
                 <div class="modal-dialog" role="document">
                   <div class="modal-content">
@@ -380,6 +365,27 @@ desired effect
                 </div>
               </div>
               <!--//Modal-->
+              
+               <!-- Modal -->
+              <div class="modal fade" id="deployResultModal" tabindex="-1" role="dialog" aria-labelledby="deployResultModal">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                      <h4 class="modal-title" id="modalTitleText">
+                     
+                      </h4>
+                    </div>
+                    <div class="modal-body" id="modalBodyText">
+                      
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-primary"  data-dismiss="modal">关闭</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!--//Modal-->
 
 
 <!-- REQUIRED JS SCRIPTS -->
@@ -416,8 +422,13 @@ function choose_process_back(){
 }
 
 function deployProcessDefinition_back(data){
-	alert(data.id);
-	alert(data.name);
+	if(data.code=='0'){
+		$('#modalTitleText').html("部署成功");
+	}else{
+		$('#modalTitleText').html("部署失败");
+	}  
+	$('#modalBodyText').html(data.msg);
+	$('#deployResultModal').modal({keyboard: true});
 	
 }
 

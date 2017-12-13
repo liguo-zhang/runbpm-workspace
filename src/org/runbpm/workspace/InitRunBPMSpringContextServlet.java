@@ -24,7 +24,7 @@ public class InitRunBPMSpringContextServlet extends HttpServlet {
 			Configuration.setContext(springAppContext);
 	        
 			RunBPMService runBPMService = Configuration.getContext().getRunBPMService();
-			runBPMService.loadProcessModels(true);
+			runBPMService.loadProcessModels();
 	    } 
 	 
 }

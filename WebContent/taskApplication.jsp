@@ -320,11 +320,9 @@ $(document).ready(function() {
 	 
 	 $("#submit_taskApplication").on('click',function (e) {
 		    
-		    
+		    //只是跳转，listApplicationTemplate.jsp没有做处理
 		    var action = "listApplicationTemplate.jsp?taskInstanceId=<%=taskInstanceId%>";
-		    
 		    $('#submit_form').attr('action', action);
-		    
 		    $("#submit_form").submit();
 		    
 		    

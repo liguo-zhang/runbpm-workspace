@@ -30,23 +30,7 @@ if(userIdinSession!=null){
 
 <%
 RunBPMService runBPMService = Configuration.getContext().getRunBPMService();
-List<ProcessModel> processModelist = runBPMService.loadProcessModels(true);
-
-//判断是否需要提交
-String isSubmit = request.getParameter("isSubmit")+"";
-String code = null;
-String result = null;
-
-
-if(isSubmit!=null&&isSubmit.trim().equals("1")){
-	String modelId = request.getParameter("modelId")+"";
-	
-	ProcessInstance processInstance = runBPMService.createAndStartProcessInstance(Long.parseLong(modelId), userId);
-	
-	code = "0";
-	result =  "创建并启动成功。流程实例ID为["+processInstance.getId()+"],流程名称为["+processInstance.getName()+"]";
-	
-}
+List<ProcessModel> processModelist = runBPMService.loadProcessModels();
 
 %>
 
@@ -263,10 +247,6 @@ desired effect
     <section class="content">
        <div class="box">
             <!-- /.box-header -->
-            <form id="listForm" name="listForm"  method="post">
-            		
-            </form>
-            
 	           <div class="box-body table-responsive no-padding">
 	              <table class="table table-hover tree">
 	                <tr>
@@ -323,22 +303,12 @@ desired effect
                   <div class="modal-content">
                     <div class="modal-header">
                       <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                      <h4 class="modal-title" id="deployResultModal">
-                      <%
-                      if("0".equals(code)){
-                    	  out.println("创建流程成功");
-                      }else{
-                    	  out.println("创建流程失败["+result+"]");
-                      }
-                      %>
+                      <h4 class="modal-title" id="modalTitleText">
+                      
                       </h4>
                     </div>
-                    <div class="modal-body">
-                      <% 
-                      
-                    	out.println(result);
-                      
-                      %>
+                    <div class="modal-body" id="modalBodyText">
+                    
                     </div>
                     <div class="modal-footer">
                       <button type="button" class="btn btn-primary"  data-dismiss="modal">关闭</button>
@@ -394,23 +364,30 @@ desired effect
  
 $(document).ready(function() {
 	//--------发起流程
-	<%
-	if(isSubmit!=null&&isSubmit.trim().equals("1")){
-		out.println("$('#deployResultModal').modal({keyboard: true});");
-	}
-	%>
-	
 	
 	$("button[id^='create_process']").each(function(i){
 		
 		 $(this).on('click',function (e) {
 		    
-		    var modelIdValue = $(this).attr('modelId');
-		    
-		    $('#listForm').attr('action', 'listProcessModel.jsp?isSubmit=1&modelId='+modelIdValue);
-		    
-		    $("#listForm").submit();
-		    
+			var modelIdValue = $(this).attr('modelId');
+		 	var url = "ajaxSubmitHandler.jsp"; 
+	        var data = {"isCreateAndStartProcessInstance":"1","modelId":modelIdValue}
+	        $.ajax({
+	           type: "POST",
+	           url: url,
+	           data: data, // serializes the form's elements.
+	           success: function(data)
+	           {
+					if(data.code=='0'){
+						$('#modalTitleText').html("创建流程成功");
+						$('#modalBodyText').html("创建并启动成功。流程实例ID为["+data.id+"],流程名称为["+data.name+"]");
+					}else{
+						$('#modalTitleText').html("创建流程失败");
+						$('#modalBodyText').html(data.msg);
+					}  
+					$('#deployResultModal').modal({keyboard: true});
+	           }
+	         });
 		    
 		});
 	});

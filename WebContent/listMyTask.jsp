@@ -1,3 +1,21 @@
+<%
+//判断session，记录userId. begin-->
+Object userIdinSession = session.getAttribute("userId");
+String userId = null;
+if(userIdinSession!=null){
+	userId = userIdinSession.toString();
+}else{
+	if(session.getAttribute("party")== null){
+		if(null != request.getQueryString()){
+			session.setAttribute("redirectUrl", request.getRequestURL().append("?").append(request.getQueryString()).toString());
+		}else{
+			session.setAttribute("redirectUrl", request.getRequestURL().toString());
+		}
+		response.sendRedirect("login.jsp");
+	}
+}
+//判断session，记录userId. end-->
+%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 
@@ -12,74 +30,12 @@
 <%
 RunBPMService runBPMService = Configuration.getContext().getRunBPMService();
 
-//判断session，记录userId
-Object userIdinSession = session.getAttribute("userId");
-String userId = null;
-if(userIdinSession!=null){
-	userId = userIdinSession.toString();
-}else{
-	response.sendRedirect("login.jsp");
-}
-
 //-----获取本人代办流程列表 开始-->
 EnumSet<EntityConstants.TASK_STATE> stateSet = EnumSet.noneOf(EntityConstants.TASK_STATE.class);  
 stateSet.add(EntityConstants.TASK_STATE.NOT_STARTED);  
 stateSet.add(EntityConstants.TASK_STATE.RUNNING);
 List<TaskInstance> taskList = runBPMService.listTaskInstanceByUserIdAndState(userId, stateSet);
 //-----获取本人代办流程列表 结束<-- 
-
-//----以下是 判断接受任务、接受任务、转到任务处理界面的逻辑
-String taskInstanceId = request.getParameter("taskInstanceId");
-String isSubmit = request.getParameter("isSubmit")+"";
-boolean showClaimTask = false;
-boolean sendRedirect=false;//是否转到任务界面
-if(isSubmit!=null&&isSubmit.trim().equals("1")){
-	TaskInstance taskInstance = runBPMService.loadTaskInstance(Long.parseLong(taskInstanceId));
-	if(taskInstance.getState().equals(EntityConstants.TASK_STATE.NOT_STARTED)){
-		//需要显示接受任务界面
-		showClaimTask = true;
-	}else if(taskInstance.getState().equals(EntityConstants.TASK_STATE.RUNNING)){
-		//需要转发到处理任务界面
-		sendRedirect=true;
-	}
-}
-String isClaim = request.getParameter("isClaim")+"";
-if(isClaim!=null&&isClaim.trim().equals("1")){
-	//处理任务（抢任务），将该任务置于我的名下，任务状态从“未开始”转化为“运行中”
-	runBPMService.claimUserTask(Long.parseLong(taskInstanceId));
-	sendRedirect=true;
-}
-
-//转发到任务处理界面 开始-->
-if(sendRedirect){
-	TaskInstance taskInstance = runBPMService.loadTaskInstance(Long.parseLong(taskInstanceId));
-	ProcessModel processModel =runBPMService.loadProcessModelByModelId(taskInstance.getProcessModelId());
-	ActivityDefinition activityDefinition = processModel.getProcessDefinition().getActivity(taskInstance.getActivityDefinitionId());
-	ExtensionElements extensionElements = activityDefinition.getExtensionElements();
-	Map templateMap = extensionElements.getExtensionPropsMap("runBPM_ApplicationTemplate_Definition");
-	
-	
-	String url = null;
-	if(templateMap!=null){
-		if("appliation_operation".equals(templateMap.get("type").toString())){
-		    	 url="listApplicationTemplate.jsp"+"?taskInstanceId="+taskInstanceId;
-		}
-	}else{
-		 url = extensionElements.getPropertyValue("application")+"?taskInstanceId="+taskInstanceId;
-	}
-	
-	response.sendRedirect(url);
-}
-//转发到任务处理界面 结束<--
-
-//是否由提交任务界面过来，如果是的话，需要显示处理成功的提示 begin-->
-boolean completeTask = false;
-String isCompleteTask = request.getParameter("isCompleteTask")+"";
-if(isCompleteTask!=null&&isCompleteTask.trim().equals("1")){
-	completeTask = true;
-}
-//是否由提交任务界面过来，如果是的话，需要显示处理成功的提示 end<--
-
 
 %>
 
@@ -319,7 +275,17 @@ desired effect
                 %>
                 <tr>
                   <td><%=taskInstance.getId() %></td>
-                  <td><a href="listMyTask.jsp?isSubmit=1&taskInstanceId=<%=taskInstance.getId() %>"><%=taskInstance.getName() %></a></td>
+	                  <%if(taskInstance.getState().equals(EntityConstants.TASK_STATE.NOT_STARTED)){
+	              		 	//需要显示接受任务界面)
+	                	  %>
+	                	  		<td><a href="#" onclick="showClaimTask(<%=taskInstance.getId() %>)" ><%=taskInstance.getName() %></a></td>
+	                	  <%} else if(taskInstance.getState().equals(EntityConstants.TASK_STATE.RUNNING)){
+	                			//需要转发到处理任务界面
+	                   %>
+	                   		<td><a href="ajaxSubmitHandler.jsp?isFowardToApplicationTemplate=1&taskInstanceId=<%=taskInstance.getId() %>"><%=taskInstance.getName() %></a></td>
+	                   <%
+	                  	}
+	                   %>
                   <td><%=taskInstance.getUserId() %></td>
                   <td><%=taskInstance.getProcessInstanceId() %></td>
                   <td><%=taskInstance.getProcessDefinitionId() %></td>
@@ -356,23 +322,6 @@ desired effect
                 </div>
               </div>
               
-              <div class="modal fade" id="infoModal" tabindex="-1" role="dialog" aria-labelledby="deployResultModal">
-                <div class="modal-dialog" role="document">
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                      <h4 class="modal-title" id="deployResultModal">成功提交任务</h4>
-                    </div>
-                    <div class="modal-body">
-                      已经成功提交任务。
-                    </div>
-                    <div class="modal-footer">
-                      <button type="button" class="btn btn-primary"  data-dismiss="modal">关闭</button>
-                      <form id="submit_form" method="post"></form>
-                    </div>
-                  </div>
-                </div>
-              </div>
               <!--//Modal-->
 
     </section>
@@ -413,28 +362,24 @@ desired effect
      fixed layout. -->
 
 <script>
+var taskInstanceId = null;
+
+function showClaimTask(taskId){
+	//给taskInstanceId赋值
+	taskInstanceId = taskId;
+	$('#hiddenModal').modal({keyboard: true});	
+}
 
 $(document).ready(function() {
-	<%
-	if(showClaimTask){
-		out.println("$('#hiddenModal').modal({keyboard: true});");
-	}
-	if(completeTask){
-		out.println("$('#infoModal').modal({keyboard: true});");
-	}
-	%>
-	
 	
 	 $("#claimTask").on('click',function (e) {
-		    
-		    var action = 'listMyTask.jsp?isClaim=1&taskInstanceId='+<%=taskInstanceId%>;
-		    $('#submit_form').attr('action', action);
-		    $("#submit_form").submit();
-		    
+		 //提交表单，将foward到处理页面   
+		 var action = 'ajaxSubmitHandler.jsp?isClaim=1&taskInstanceId='+taskInstanceId;
+		 $('#submit_form').attr('action', action);
+		 $("#submit_form").submit();
 		    
 	});
 });
-
 
 </script>
 </body>
