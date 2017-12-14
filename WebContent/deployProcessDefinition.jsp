@@ -172,7 +172,7 @@ desired effect
 	          </a>
 	          <ul class="treeview-menu">
 	           	<li><a href="modeler.jsp"><i class="fa fa-circle-o"></i> 定义流程</a></li>
-	          	<li  class="active"><a href="deployProcessDefinition.jsp"><i class="fa fa-circle-o"></i> 导入流程定义</a></li>
+	          	<li  class="active"><a href="deployProcessDefinition.jsp"><i class="fa fa-circle-o"></i> 部署流程定义</a></li>
 	          	<li><a href="listProcessModel.jsp"><i class="fa fa-circle-o"></i> 创建流程</a></li>
 	          </ul>
 	        </li>
@@ -226,7 +226,7 @@ desired effect
     
     <section class="content-header">
       <h1>
-        导入流程定义
+        部署流程定义
         <small>请选择本地硬盘中，符合BPMN XML格式的流程定义文件</small>
       </h1>
     </section>

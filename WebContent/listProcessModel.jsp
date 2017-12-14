@@ -185,7 +185,7 @@ desired effect
 	          </a>
 	          <ul class="treeview-menu">
 	          	<li><a href="modeler.jsp"><i class="fa fa-circle-o"></i> 定义流程</a></li>
-	          	<li><a href="deployProcessDefinition.jsp"><i class="fa fa-circle-o"></i> 导入流程定义</a></li>
+	          	<li><a href="deployProcessDefinition.jsp"><i class="fa fa-circle-o"></i> 部署流程定义</a></li>
 	          	<li  class="active"><a href="listProcessModel.jsp"><i class="fa fa-circle-o"></i> 创建流程</a></li>
 	          </ul>
 	        </li>
@@ -254,8 +254,8 @@ desired effect
 	                  <th>流程定义</th>
 	                  <th>最新流程定义版本</th>
 	                  <th>名称</th>
-	                  <th>描述</th>
-	                  <th>创建时间</th>
+	                  <th>部署时间</th>
+	                  <th>运行实例个数</th>
 	                  <th>操作</th>
 	                </tr>
 	                <%
@@ -269,9 +269,9 @@ desired effect
 			                  <td><%=pm.getProcessDefinition().getId() %></td>
 			                  <td><%=pm.getVersion() %> </td>
 			                  <td><%=pm.getName() %></td>
-			                  <td><%=pm.getProcessDefinition().getDocumentation() %></td>
 			                  <td><%=pm.getCreateDate() %></td>
-			                  <td><button id="create_process_<%=pm.getId() %>" modelId='<%=pm.getId() %>' type="button" class="btn btn-info btn-sm">创建流程</button></td>
+			                  <td><%=pm.getProcessDefinition().getDocumentation() %></td>
+			                  <td><button id="create_process_<%=pm.getId() %>" modelId='<%=pm.getId() %>' type="button" class="btn btn-info btn-sm">创建流程实例</button></td>
 			                </tr>
 			        <%   
 			             List<ProcessModel> subList = runBPMService.loadProcessModelsByProcessDefinitionId(pm.getProcessDefinitionId());
@@ -282,9 +282,9 @@ desired effect
 			                  <td><%=subPM.getProcessDefinition().getId() %></td>
 			                  <td><%=subPM.getVersion() %></td>
 			                  <td><%=subPM.getName() %></td>
-			                  <td><%=subPM.getProcessDefinition().getDocumentation() %></td>
 			                  <td><%=subPM.getCreateDate() %></td>
-			                  <td><button id="create_process_<%=subPM.getId() %>" modelId='<%=subPM.getId() %>' type="button" class="btn btn-default btn-sm">创建流程</button></td>
+			                  <td><%=subPM.getProcessDefinition().getDocumentation() %></td>
+			                  <td><button id="create_process_<%=subPM.getId() %>" modelId='<%=subPM.getId() %>' type="button" class="btn btn-default btn-sm">指定该版本创建流程</button></td>
 			                </tr>
 	                <%			
 	                		}
